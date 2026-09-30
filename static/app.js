@@ -55,6 +55,12 @@ const memoryView = document.querySelector("#memory-view");
 const inspectorTabs = document.querySelector("#inspector-tabs");
 const processTab = document.querySelector("#process-tab");
 const memoryTab = document.querySelector("#memory-tab");
+const documentsTab = document.querySelector("#documents-tab");
+const documentsView = document.querySelector("#documents-view");
+const openDocumentsButton = document.querySelector("#open-documents-panel");
+const documentStatus = document.querySelector("#document-status");
+const documentStrategy = document.querySelector("#document-strategy");
+const documentStats = document.querySelector("#document-stats");
 const showProcessButton = document.querySelector("#show-task-process");
 const contextPanel = document.querySelector("#context-panel");
 const contextBackdrop = document.querySelector("#context-backdrop");
@@ -74,6 +80,8 @@ let currentSession = null;
 let taskRunning = false;
 let controlBusy = false;
 let inspectorMode = "memory";
+let documentPoll = null;
+documentStrategy.value = localStorage.getItem("documentStrategy") === "fixed" ? "fixed" : "structure";
 let renderedTaskSessionId = null;
 let taskOperation = null;
 let taskTimer = null;
@@ -301,22 +309,26 @@ function readyStatus() {
 }
 
 function setInspector(mode) {
-  inspectorMode = currentSession?.task ? mode : "memory";
+  inspectorMode = mode === "process" && !currentSession?.task ? "memory" : mode;
   taskPanel.hidden = inspectorMode !== "process";
   memoryView.hidden = inspectorMode !== "memory";
-  for (const [tab, name] of [[processTab, "process"], [memoryTab, "memory"]]) {
+  documentsView.hidden = inspectorMode !== "documents";
+  for (const [tab, name] of [[processTab, "process"], [memoryTab, "memory"], [documentsTab, "documents"]]) {
     tab.setAttribute("aria-selected", String(inspectorMode === name));
     tab.tabIndex = inspectorMode === name ? 0 : -1;
   }
 }
 
 function openInspector(mode) {
+  inspectorTabs.hidden = false;
+  processTab.hidden = !currentSession?.task;
   setInspector(mode);
   contextPanel.classList.add("open");
   contextPanel.setAttribute("aria-hidden", "false");
   contextBackdrop.hidden = false;
   document.body.classList.add("inspector-open");
   closeContextButton.focus({ preventScroll: true });
+  if (mode === "documents") void loadDocumentStatus();
 }
 
 function closeInspector() {
@@ -354,11 +366,12 @@ function taskIcon(name) {
 
 function renderTask(task) {
   taskOverview.hidden = !task;
-  inspectorTabs.hidden = !task;
+  inspectorTabs.hidden = false;
+  processTab.hidden = !task;
   if (!task) {
     renderedTaskSessionId = null;
     taskError = "";
-    setInspector("memory");
+    if (inspectorMode === "process") setInspector("memory");
     return;
   }
   if (renderedTaskSessionId !== currentSessionId) {
@@ -831,10 +844,53 @@ function renderMessages(items, updateState = true) {
       content.textContent = message.content;
     }
     article.append(label, content);
+    if (message.role === "assistant" && message.sources?.length) {
+      const sources = document.createElement("div");
+      sources.className = "message-sources";
+      for (const source of message.sources) {
+        const link = document.createElement("a");
+        link.href = `${source.source}#page=${source.page_start}`;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = `${source.section} · PDF с. ${source.page_start}${source.page_end !== source.page_start ? `–${source.page_end}` : ""} · ${source.chunk_id}`;
+        sources.append(link);
+      }
+      article.append(sources);
+    }
     return article;
   }));
   renderTaskActivity(currentSession?.task);
   requestAnimationFrame(() => { messages.scrollTop = messages.scrollHeight; });
+}
+
+async function loadDocumentStatus() {
+  try {
+    const data = await api("/api/document-index/status");
+    const stateText = {
+      missing: data.pdf_present ? "Индекс ещё не создан. Задайте вопрос о книге в обычном чате." : "PDF отсутствует: положите официальный sample в data/documents/jcip-sample.pdf.",
+      building: "Индекс строится. Первая загрузка модели может занять несколько минут.",
+      ready: data.index ? `Индекс готов. Страниц в PDF: ${data.index.pages}. Модель: ${data.index.model}.` : "Индекс не найден.",
+      error: `Ошибка: ${data.error}`,
+    };
+    documentStatus.textContent = stateText[data.state] || data.state;
+    documentStats.replaceChildren();
+    if (data.index) {
+      for (const [strategy, stats] of Object.entries(data.index.strategies)) {
+        const card = document.createElement("article");
+        const name = strategy === "fixed" ? "Фиксированные" : "По структуре";
+        card.textContent = `${name}: ${stats.chunks} чанков · в среднем ${stats.avg_tokens.toLocaleString("ru-RU")} токенов · диапазон ${stats.min_tokens}–${stats.max_tokens}`;
+        documentStats.append(card);
+      }
+    }
+    if ((data.state === "building" || (data.state === "missing" && busy)) && !documentPoll) {
+      documentPoll = setInterval(() => { void loadDocumentStatus(); }, 3000);
+    } else if (data.state !== "building" && !(data.state === "missing" && busy) && documentPoll) {
+      clearInterval(documentPoll);
+      documentPoll = null;
+    }
+  } catch (error) {
+    documentStatus.textContent = error.message;
+  }
 }
 
 function emptyMemory(text) {
@@ -941,10 +997,12 @@ async function sendChatMessage(content) {
   ];
   renderMessages(optimisticMessages, false);
   try {
-    const result = await api(`/api/chat/sessions/${currentSessionId}/messages`, {
+    const request = api(`/api/chat/sessions/${currentSessionId}/messages`, {
       method: "POST",
-      body: JSON.stringify({ content }),
+      body: JSON.stringify({ content, strategy: documentStrategy.value }),
     });
+    if (!documentsView.hidden) void loadDocumentStatus();
+    const result = await request;
     const [session, memory, loadedProfiles] = await Promise.all([
       api(`/api/chat/sessions/${currentSessionId}`),
       api(`/api/memory?session_id=${encodeURIComponent(currentSessionId)}`),
@@ -964,6 +1022,7 @@ async function sendChatMessage(content) {
     status.textContent = error.message;
   } finally {
     setBusy(false);
+    if (!documentsView.hidden) void loadDocumentStatus();
     input.focus();
     void drainQueue();
   }
@@ -1270,17 +1329,22 @@ replanButton.addEventListener("click", () => {
 refreshButton.addEventListener("click", () => openSession(currentSessionId));
 processTab.addEventListener("click", () => setInspector("process"));
 memoryTab.addEventListener("click", () => setInspector("memory"));
+documentsTab.addEventListener("click", () => { setInspector("documents"); void loadDocumentStatus(); });
 inspectorTabs.addEventListener("keydown", (event) => {
   if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
   event.preventDefault();
-  const mode = event.key === "Home" ? "process" : event.key === "End" ? "memory" : inspectorMode === "process" ? "memory" : "process";
+  const modes = currentSession?.task ? ["process", "memory", "documents"] : ["memory", "documents"];
+  const current = modes.indexOf(inspectorMode);
+  const mode = event.key === "Home" ? modes[0] : event.key === "End" ? modes.at(-1) : modes[(current + (event.key === "ArrowRight" ? 1 : -1) + modes.length) % modes.length];
   setInspector(mode);
-  (mode === "process" ? processTab : memoryTab).focus();
+  ({ process: processTab, memory: memoryTab, documents: documentsTab })[mode].focus();
 });
 showProcessButton.addEventListener("click", () => {
   openInspector("process");
 });
 openMemoryButton.addEventListener("click", () => openInspector("memory"));
+openDocumentsButton.addEventListener("click", () => openInspector("documents"));
+documentStrategy.addEventListener("change", () => localStorage.setItem("documentStrategy", documentStrategy.value));
 closeContextButton.addEventListener("click", closeInspector);
 contextBackdrop.addEventListener("click", closeInspector);
 openNavigationButton.addEventListener("click", openNavigation);

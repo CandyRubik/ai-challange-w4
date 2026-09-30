@@ -5,6 +5,7 @@ from contextlib import AbstractContextManager, contextmanager
 from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
+import json
 import sqlite3
 from threading import Lock
 from typing import Protocol
@@ -51,6 +52,7 @@ class ChatSessionRepository(Protocol):
         session_id: str,
         user_content: str,
         assistant_content: str,
+        *, sources: list[dict] | None = None,
     ) -> StoredSession: ...
 
     def append_command(self, session_id: str, command_text: str) -> StoredSession: ...
@@ -126,6 +128,7 @@ class SQLiteChatSessionRepository:
                         CHECK (kind IN ('message', 'command')),
                     content TEXT NOT NULL,
                     is_refusal INTEGER NOT NULL DEFAULT 0,
+                    sources_json TEXT NOT NULL DEFAULT '[]',
                     created_at TEXT NOT NULL,
                     UNIQUE (session_id, position)
                 );
@@ -179,6 +182,10 @@ class SQLiteChatSessionRepository:
                 connection.execute(
                     "ALTER TABLE chat_messages ADD COLUMN is_refusal INTEGER NOT NULL DEFAULT 0",
                 )
+            if "sources_json" not in message_columns:
+                connection.execute(
+                    "ALTER TABLE chat_messages ADD COLUMN sources_json TEXT NOT NULL DEFAULT '[]'",
+                )
 
     @staticmethod
     def _timestamp(value: datetime) -> str:
@@ -206,7 +213,7 @@ class SQLiteChatSessionRepository:
 
         message_rows = connection.execute(
             """
-            SELECT id, role, kind, content, created_at, is_refusal
+            SELECT id, role, kind, content, created_at, is_refusal, sources_json
             FROM chat_messages
             WHERE session_id = ?
             ORDER BY position
@@ -221,6 +228,7 @@ class SQLiteChatSessionRepository:
                 content=message["content"],
                 created_at=self._datetime(message["created_at"]),
                 refusal=bool(message["is_refusal"]),
+                sources=tuple(json.loads(message["sources_json"])),
             )
             for message in message_rows
         )
@@ -306,11 +314,12 @@ class SQLiteChatSessionRepository:
         session_id: str,
         user_content: str,
         assistant_content: str,
+        *, sources: list[dict] | None = None,
     ) -> StoredSession:
         with self._connection() as connection:
             connection.execute("BEGIN IMMEDIATE")
             session = self._load_session(connection, session_id)
-            self._append_exchange(connection, session, user_content, assistant_content)
+            self._append_exchange(connection, session, user_content, assistant_content, sources=sources)
 
         return self.get(session_id)
 
@@ -356,7 +365,7 @@ class SQLiteChatSessionRepository:
     def _append_exchange(
         self, connection: sqlite3.Connection, session: StoredSession,
         user_content: str, assistant_content: str,
-        *, refusal: bool = False,
+        *, refusal: bool = False, sources: list[dict] | None = None,
     ) -> None:
         timestamp = self._timestamp(datetime.now(timezone.utc))
         position = len(session.messages)
@@ -366,12 +375,13 @@ class SQLiteChatSessionRepository:
         connection.executemany(
             """
             INSERT INTO chat_messages
-                (id, session_id, position, role, content, created_at, is_refusal)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+                (id, session_id, position, role, content, created_at, is_refusal, sources_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
-                (str(uuid4()), session.id, position, "user", user_content, timestamp, int(refusal)),
-                (str(uuid4()), session.id, position + 1, "assistant", assistant_content, timestamp, int(refusal)),
+                (str(uuid4()), session.id, position, "user", user_content, timestamp, int(refusal), "[]"),
+                (str(uuid4()), session.id, position + 1, "assistant", assistant_content, timestamp, int(refusal),
+                 json.dumps(sources or [], ensure_ascii=False)),
             ],
         )
         connection.execute(

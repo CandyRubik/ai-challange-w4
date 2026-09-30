@@ -152,6 +152,7 @@ class Agent:
         profile: ProfileContext | None = None,
         working_memory: Sequence[MemoryItem] = (),
         long_term_memory: Sequence[MemoryItem] = (),
+        document_context: str = "",
     ) -> str:
         conversation = self._input_policy.apply(
             context if self._context_enabled else [],
@@ -163,7 +164,7 @@ class Agent:
                     "role": "system",
                     "content": self._prompt(
                         orchestration, memory, profile, working_memory, long_term_memory,
-                    ),
+                    ) + ("\n\n" + document_context if document_context else ""),
                 },
                 *conversation,
             ],

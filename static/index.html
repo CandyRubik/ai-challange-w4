@@ -4,15 +4,15 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Чат с агентом и автоматической трёхслойной памятью" />
-    <title>AI Challenge W3</title>
+    <title>AI Challenge W4</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/styles.css?v=minimal-shell-1" />
+    <link rel="stylesheet" href="/styles.css?v=day21-documents" />
   </head>
   <body>
     <main class="chat-shell">
       <aside class="sidebar">
         <div class="sidebar-heading">
-          <a class="brand" href="/"><span>◇</span><span>AI Challenge W3</span></a>
+          <a class="brand" href="/"><span>◇</span><span>AI Challenge W4</span></a>
           <button id="close-navigation" class="icon-button mobile-only" type="button" aria-label="Закрыть список чатов">×</button>
         </div>
         <section class="profile-switcher" aria-labelledby="profile-switcher-label">
@@ -39,6 +39,7 @@
           </div>
           <div class="header-actions">
             <span id="status" role="status">Подключение…</span>
+            <button id="open-documents-panel" class="secondary" type="button">Индексы</button>
             <button id="open-memory-panel" class="secondary" type="button">Память</button>
             <button id="refresh-session" class="icon-button" type="button" title="Обновить чат" aria-label="Обновить чат">↻</button>
           </div>
@@ -99,7 +100,7 @@
 
       <div id="navigation-backdrop" class="context-backdrop navigation-backdrop" hidden></div>
       <div id="context-backdrop" class="context-backdrop" hidden></div>
-      <aside id="context-panel" class="context-panel" aria-label="Процесс задачи и память" aria-hidden="true">
+      <aside id="context-panel" class="context-panel" aria-label="Процесс задачи, индексы и память" aria-hidden="true">
         <header class="context-panel-header">
           <strong>Контекст</strong>
           <button id="close-context-panel" class="icon-button" type="button" aria-label="Закрыть панель">×</button>
@@ -107,6 +108,7 @@
         <div id="inspector-tabs" class="inspector-tabs" role="tablist" aria-label="Правая панель" hidden>
           <button id="process-tab" role="tab" aria-selected="true" aria-controls="task-panel" type="button">Процесс</button>
           <button id="memory-tab" role="tab" aria-selected="false" aria-controls="memory-view" tabindex="-1" type="button">Память</button>
+          <button id="documents-tab" role="tab" aria-selected="false" aria-controls="documents-view" tabindex="-1" type="button">Индексы</button>
         </div>
         <section id="task-panel" class="task-panel" role="tabpanel" aria-labelledby="process-tab" hidden>
           <div class="task-heading">
@@ -134,6 +136,16 @@
             <summary id="task-results-summary">Сохранённые результаты</summary>
             <div id="task-results"></div>
           </details>
+        </section>
+        <section id="documents-view" class="documents-panel" role="tabpanel" aria-labelledby="documents-tab" hidden>
+          <p class="eyebrow">DOCUMENT INDEX</p>
+          <h2>Индексы книги</h2>
+          <p>Java Concurrency in Practice, официальный ознакомительный фрагмент. При первом вопросе к книге агент автоматически создаст локальный индекс.</p>
+          <p id="document-status" role="status">Проверяю индекс…</p>
+          <label for="document-strategy">Стратегия чанкинга</label>
+          <select id="document-strategy"><option value="structure">По разделам и страницам</option><option value="fixed">Фиксированный размер</option></select>
+          <p>Выбранная стратегия применяется к следующему вопросу о книге. После первого обращения можно переключаться между стратегиями без повторной индексации.</p>
+          <div id="document-stats" class="document-stats"></div>
         </section>
         <section id="memory-view" class="memory-panel" role="tabpanel" aria-labelledby="memory-tab">
           <header>
@@ -295,6 +307,6 @@
         </footer>
       </form>
     </dialog>
-    <script src="/app.js?v=minimal-shell-1" defer></script>
+    <script src="/app.js?v=day21-lazy-index" defer></script>
   </body>
 </html>
