@@ -10,6 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .agents.agent import Agent, AgentInputError, AgentOutputError
+from .indexing.rag import DocumentRag
+from .indexing.corpus import DEFAULT_PDF
+from .indexing.store import DEFAULT_INDEX_DIR, DocumentIndex, DocumentIndexError
 from .invariants import (
     InvariantSnapshot, InvariantUpdateRequest, InvariantSettingsConflict,
     SQLiteInvariantRepository,
@@ -66,7 +69,7 @@ def _allowed_origins() -> list[str]:
     return [origin.strip() for origin in configured_origins.split(",") if origin.strip()]
 
 
-app = FastAPI(title="AI Challenge W3 API")
+app = FastAPI(title="AI Challenge W4 API")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_allowed_origins(),
@@ -108,7 +111,22 @@ def get_chat_session_service() -> ChatSessionService:
         get_profile_repository(),
         ProfileInterviewer(provider),
         invariant_repository=get_invariant_repository(),
+        document_rag=DocumentRag(
+            get_document_index(), DeepSeekProvider(thinking_enabled=False),
+        ),
     )
+
+
+@lru_cache(maxsize=1)
+def get_document_index() -> DocumentIndex:
+    root = Path(os.getenv("DOCUMENT_INDEX_DIR", str(DEFAULT_INDEX_DIR)))
+    pdf = Path(os.getenv("DOCUMENT_PDF_PATH", str(DEFAULT_PDF)))
+    return DocumentIndex(root=root, pdf_path=pdf)
+
+
+@app.get("/api/document-index/status")
+def document_index_status(index: DocumentIndex = Depends(get_document_index)) -> dict:
+    return index.status()
 
 
 @lru_cache(maxsize=1)
@@ -304,7 +322,7 @@ def send_chat_message(
     service: ChatSessionService = Depends(get_chat_session_service),
 ) -> ChatSendResponse:
     try:
-        return service.send(session_id, request.content)
+        return service.send(session_id, request.content, request.strategy)
     except ChatSessionNotFound:
         raise HTTPException(status_code=404, detail="Чат не найден") from None
     except ProfileNotFound:
@@ -317,6 +335,8 @@ def send_chat_message(
         raise HTTPException(status_code=502, detail=str(error)) from None
     except LlmConfigurationError:
         raise HTTPException(status_code=503, detail="DEEPSEEK_API_KEY не задан") from None
+    except DocumentIndexError as error:
+        raise HTTPException(status_code=503, detail=str(error)) from None
 
 
 @app.post("/api/chat/sessions/{session_id}/task", response_model=ChatSession, status_code=201)

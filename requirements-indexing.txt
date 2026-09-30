@@ -1,0 +1,5 @@
+-r requirements.txt
+pypdf>=5,<7
+fonttools>=4.50,<5
+faiss-cpu>=1.9,<2
+sentence-transformers>=3.4,<6

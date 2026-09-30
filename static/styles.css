@@ -66,6 +66,9 @@ h1 { margin-top: 3px; font-size: 22px; }
 .message.user p { border-color: #6257b5; background: #332d63; }
 .message.command p { border-style: dashed; border-color: #6d5b9b; color: #c5b8ee; background: #211d36; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
 .message.command span { color: #a98bea; }
+.message-sources { display: grid; gap: 5px; margin-top: 7px; }
+.message-sources a { display: block; border: 1px solid #425074; border-radius: 8px; padding: 7px 9px; color: #b6c9ff; background: #182036; font-size: 11px; text-decoration: none; }
+.message-sources a:hover { border-color: #778ce0; text-decoration: underline; }
 .typing-indicator { display: flex; gap: 6px; width: fit-content; border: 1px solid #303653; border-radius: 16px; padding: 16px 18px; background: #1a1e32; }
 .typing-indicator i { width: 7px; height: 7px; border-radius: 50%; background: #a99cf4; animation: typing-pulse 1.15s ease-in-out infinite; }
 .typing-indicator i:nth-child(2) { animation-delay: 0.15s; }
@@ -103,6 +106,13 @@ textarea { resize: none; border: 1px solid #353b5c; border-radius: 14px; padding
   overflow: hidden;
   padding: 22px 18px;
 }
+.documents-panel { display: grid; align-content: start; gap: 13px; min-height: 0; overflow-y: auto; padding: 22px 18px; }
+.documents-panel[hidden] { display: none; }
+.documents-panel h2 { font-size: 18px; }
+.documents-panel p { color: #aeb4cc; font-size: 12px; line-height: 1.5; }
+.documents-panel label { color: #cbd0e7; font-size: 12px; }
+.document-stats { display: grid; gap: 8px; }
+.document-stats article { border: 1px solid #343b5c; border-radius: 10px; padding: 10px; background: #171c30; color: #cbd0e7; font-size: 12px; line-height: 1.45; }
 .memory-panel > header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .memory-panel h2 { margin-top: 4px; font-size: 18px; }
 .memory-layers { display: grid; align-content: start; gap: 16px; min-height: 0; overflow-y: auto; padding-right: 2px; }
