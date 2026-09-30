@@ -820,7 +820,10 @@ function renderMessages(items, updateState = true) {
     renderMemory();
   }
   if (!items.length) {
-    messages.innerHTML = '<div class="empty"><span>✦</span><h2>Чем помочь?</h2><p>Напишите первую задачу. Перед работой агент коротко познакомится с вами.</p></div>';
+    const hint = activeProfile()?.onboarding_complete
+      ? "Задайте вопрос по книге или любую другую задачу."
+      : "Напишите первую задачу. Перед работой агент коротко познакомится с вами.";
+    messages.innerHTML = `<div class="empty"><span>✦</span><h2>Чем помочь?</h2><p>${hint}</p></div>`;
     return;
   }
   messages.replaceChildren(...items.map((message) => {

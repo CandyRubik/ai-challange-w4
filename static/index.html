@@ -143,7 +143,7 @@
         <section id="documents-view" class="documents-panel" role="tabpanel" aria-labelledby="documents-tab" hidden>
           <p class="eyebrow">DOCUMENT INDEX</p>
           <h2>Индексы книги</h2>
-          <p>Java Concurrency in Practice, официальный ознакомительный фрагмент. В режиме «С RAG» первый вопрос создаст локальный индекс.</p>
+          <p>Java Concurrency in Practice, официальный ознакомительный фрагмент. Если индекса ещё нет, первый вопрос в режиме «С RAG» создаст его локально.</p>
           <p id="document-status" role="status">Проверяю индекс…</p>
           <label for="document-strategy">Стратегия чанкинга</label>
           <select id="document-strategy"><option value="structure">По разделам и страницам</option><option value="fixed">Фиксированный размер</option></select>
@@ -310,6 +310,6 @@
         </footer>
       </form>
     </dialog>
-    <script src="/app.js?v=day22-rag-modes" defer></script>
+    <script src="/app.js?v=day22-demo-copy" defer></script>
   </body>
 </html>
