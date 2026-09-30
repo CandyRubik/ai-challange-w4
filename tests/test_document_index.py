@@ -7,6 +7,7 @@ from threading import Lock
 import time
 
 import pytest
+from fastapi.testclient import TestClient
 
 np = pytest.importorskip("numpy")
 pytest.importorskip("faiss")
@@ -17,6 +18,7 @@ from app.indexing.rag import DocumentRag
 from app.indexing.store import DocumentIndex, DocumentIndexError
 from app.indexing.store import SearchHit
 from app.agents.agent import Agent
+from app.main import app, get_chat_session_service
 from app.services.chat_sessions import ChatSessionService
 from app.storage.chat_sessions import SQLiteChatSessionRepository
 
@@ -52,6 +54,11 @@ class UnrelatedRouter:
         return json.dumps({"search_book": False, "query": ""})
 
 
+class RewriteOnlyRouter:
+    def generate_json(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+        return json.dumps({"search_book": False, "query": "travel quotes time budget"})
+
+
 class ChatModel(Router):
     def generate(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
         assert "DOCUMENT_EXCERPTS" in messages[0]["content"]
@@ -59,6 +66,9 @@ class ChatModel(Router):
 
 
 class ReadyIndex:
+    def __init__(self) -> None:
+        self.queries: list[str] = []
+
     def status(self) -> dict:
         return {"index": {"version": "test"}}
 
@@ -67,6 +77,7 @@ class ReadyIndex:
 
     def search(self, query: str, strategy: str, k: int) -> list[SearchHit]:
         assert strategy == "structure"
+        self.queries.append(query)
         return [SearchHit({
             "chunk_id": "structure-0000", "source": "https://jcip.net/jcip-sample.pdf",
             "title": "Java Concurrency in Practice", "section": "6.1 Executor Framework",
@@ -133,9 +144,94 @@ def test_chat_uses_rag_and_persists_citations(tmp_path: Path) -> None:
     model = ChatModel()
     service = ChatSessionService(repository, Agent(model), document_rag=DocumentRag(ReadyIndex(), model))
     session = service.create()
-    sent = service.send(session.id, "What is Executor?")
+    sent = service.send(session.id, "What is Executor?", mode="rag")
     assert sent.assistant_message.sources[0]["chunk_id"] == "structure-0000"
+    assert sent.assistant_message.mode == "rag"
     assert service.get(session.id).messages[-1].sources[0]["page_start"] == 3
+    assert service.get(session.id).messages[-1].mode == "rag"
+
+
+def test_plain_mode_skips_router_and_index_and_persists_mode(tmp_path: Path) -> None:
+    class PlainModel:
+        def generate(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+            assert "DOCUMENT_EXCERPTS" not in messages[0]["content"]
+            return "Ответ без документа"
+
+    index = DocumentIndex(tmp_path / "index", tmp_path / "missing.pdf", FakeEmbedder())
+    service = ChatSessionService(
+        SQLiteChatSessionRepository(tmp_path / "chat.sqlite3"),
+        Agent(PlainModel()), document_rag=DocumentRag(index, Router()),
+    )
+    session = service.create()
+    sent = service.send(session.id, "Что сказано в книге?", mode="plain")
+    assert sent.assistant_message.mode == "plain"
+    assert sent.assistant_message.sources == []
+    assert service.get(session.id).messages[-1].mode == "plain"
+    assert index.status()["state"] == "missing"
+
+
+def test_explicit_rag_searches_even_when_router_declines() -> None:
+    index = ReadyIndex()
+    hits = DocumentRag(index, RewriteOnlyRouter()).retrieve(
+        "Как ограничивают ожидание?", [], "structure", force=True,
+    )
+    assert hits
+    assert index.queries == ["travel quotes time budget"]
+
+
+def test_explicit_rag_falls_back_to_question_if_query_json_is_invalid() -> None:
+    class BrokenRouter:
+        def generate_json(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+            return "not json"
+
+    index = ReadyIndex()
+    assert DocumentRag(index, BrokenRouter()).retrieve(
+        "Executor question", [], "structure", force=True,
+    )
+    assert index.queries == ["Executor question"]
+
+
+def test_chat_api_exposes_two_modes_and_rejects_unknown_mode(tmp_path: Path) -> None:
+    class DualModeModel(Router):
+        def generate(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+            if "DOCUMENT_EXCERPTS" in messages[0]["content"]:
+                return "Книга описывает Executor [DOC:structure-0000]."
+            return "Общий ответ без книги."
+
+    model = DualModeModel()
+    service = ChatSessionService(
+        SQLiteChatSessionRepository(tmp_path / "chat.sqlite3"),
+        Agent(model), document_rag=DocumentRag(ReadyIndex(), model),
+    )
+    session = service.create()
+    app.dependency_overrides[get_chat_session_service] = lambda: service
+    try:
+        client = TestClient(app)
+        plain = client.post(
+            f"/api/chat/sessions/{session.id}/messages",
+            json={"content": "Что такое Executor?"},
+        )
+        rag = client.post(
+            f"/api/chat/sessions/{session.id}/messages",
+            json={"content": "А что сказано в книге?", "mode": "rag"},
+        )
+        invalid = client.post(
+            f"/api/chat/sessions/{session.id}/messages",
+            json={"content": "Вопрос", "mode": "unknown"},
+        )
+        history = client.get(f"/api/chat/sessions/{session.id}")
+    finally:
+        app.dependency_overrides.clear()
+
+    assert plain.status_code == rag.status_code == 200
+    assert plain.json()["assistant_message"]["mode"] == "plain"
+    assert plain.json()["assistant_message"]["sources"] == []
+    assert rag.json()["assistant_message"]["mode"] == "rag"
+    assert len(rag.json()["assistant_message"]["sources"]) == 1
+    assert invalid.status_code == 422
+    assert [message["mode"] for message in history.json()["messages"]] == [
+        None, "plain", None, "rag",
+    ]
 
 
 def test_unrelated_question_does_not_build_index(tmp_path: Path) -> None:

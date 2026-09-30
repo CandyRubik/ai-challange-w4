@@ -6,7 +6,7 @@
     <meta name="description" content="Чат с агентом и автоматической трёхслойной памятью" />
     <title>AI Challenge W4</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/styles.css?v=day21-documents" />
+    <link rel="stylesheet" href="/styles.css?v=day22-rag-modes" />
   </head>
   <body>
     <main class="chat-shell">
@@ -83,6 +83,9 @@
           ></textarea>
           <div id="command-menu" class="command-menu" role="listbox" aria-label="Команды памяти" hidden></div>
           <div class="composer-actions">
+            <label class="rag-mode-control" for="rag-mode">Режим
+              <select id="rag-mode" aria-label="Режим ответа"><option value="plain">Без RAG</option><option value="rag">С RAG</option></select>
+            </label>
             <button class="primary" type="submit">Отправить</button>
             <button id="start-task" class="secondary" type="button">Создать задачу</button>
           </div>
@@ -140,11 +143,11 @@
         <section id="documents-view" class="documents-panel" role="tabpanel" aria-labelledby="documents-tab" hidden>
           <p class="eyebrow">DOCUMENT INDEX</p>
           <h2>Индексы книги</h2>
-          <p>Java Concurrency in Practice, официальный ознакомительный фрагмент. При первом вопросе к книге агент автоматически создаст локальный индекс.</p>
+          <p>Java Concurrency in Practice, официальный ознакомительный фрагмент. В режиме «С RAG» первый вопрос создаст локальный индекс.</p>
           <p id="document-status" role="status">Проверяю индекс…</p>
           <label for="document-strategy">Стратегия чанкинга</label>
           <select id="document-strategy"><option value="structure">По разделам и страницам</option><option value="fixed">Фиксированный размер</option></select>
-          <p>Выбранная стратегия применяется к следующему вопросу о книге. После первого обращения можно переключаться между стратегиями без повторной индексации.</p>
+          <p>Стратегия применяется к следующему вопросу в режиме «С RAG». Режим «Без RAG» не обращается к индексу.</p>
           <div id="document-stats" class="document-stats"></div>
         </section>
         <section id="memory-view" class="memory-panel" role="tabpanel" aria-labelledby="memory-tab">
@@ -307,6 +310,6 @@
         </footer>
       </form>
     </dialog>
-    <script src="/app.js?v=day21-lazy-index" defer></script>
+    <script src="/app.js?v=day22-rag-modes" defer></script>
   </body>
 </html>

@@ -1,0 +1,15 @@
+{
+  "report_sha256": "9e6d9ae1885a523a214d233b94c8d259770350dd978c702204e0f6e253f01c30",
+  "cases": [
+  {"id": 1, "plain_pass": true, "rag_pass": true, "citation_supported": true, "note": "Оба ответа объяснили последовательную обработку и блокирующий I/O."},
+  {"id": 2, "plain_pass": true, "rag_pass": true, "citation_supported": true, "note": "Оба назвали накладные расходы и расход ресурсов."},
+  {"id": 3, "plain_pass": false, "rag_pass": true, "citation_supported": true, "note": "Без RAG модель ушла в PowerShell; с RAG перечислила решения из §6.2.2."},
+  {"id": 4, "plain_pass": true, "rag_pass": true, "citation_supported": true, "note": "Оба описали цикл рабочего потока и переиспользование."},
+  {"id": 5, "plain_pass": true, "rag_pass": true, "citation_supported": true, "note": "Оба различили плавную и резкую остановку."},
+  {"id": 6, "plain_pass": true, "rag_pass": true, "citation_supported": true, "note": "Оба назвали один поток Timer и поведение при исключении."},
+  {"id": 7, "plain_pass": true, "rag_pass": true, "citation_supported": true, "note": "Оба описали возвращаемое значение, исключение и методы Future."},
+  {"id": 8, "plain_pass": true, "rag_pass": false, "citation_supported": false, "note": "RAG верно описал очередь, но ошибочно написал, что poll блокируется без результата; обычный poll возвращает null сразу."},
+  {"id": 9, "plain_pass": false, "rag_pass": true, "citation_supported": true, "note": "Без RAG дан общий сценарий дедлайна; RAG описал timed invokeAll и замещающие результаты из листинга 6.17."},
+  {"id": 10, "plain_pass": true, "rag_pass": true, "citation_supported": null, "note": "Без RAG модель признала отсутствие фрагментов; RAG сообщил об отсутствии данных и не приложил ссылки."}
+  ]
+}

@@ -17,6 +17,7 @@ class StrictModel(BaseModel):
 class ChatSendRequest(StrictModel):
     content: Annotated[str, Field(min_length=1, max_length=12_000)]
     strategy: Literal["fixed", "structure"] = "structure"
+    mode: Literal["rag", "plain"] = "plain"
 
 
 class ChatSessionCreateRequest(StrictModel):
@@ -31,6 +32,7 @@ class ChatMessage(StrictModel):
     content: str
     created_at: datetime
     sources: list[dict] = Field(default_factory=list)
+    mode: Literal["rag", "plain"] | None = None
 
 
 class TaskStartRequest(StrictModel):
