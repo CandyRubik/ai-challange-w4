@@ -380,6 +380,8 @@ body.inspector-open { overflow: hidden; }
 #message-form { width: min(760px, calc(100% - 36px)); margin: 0 auto 18px; border: 1px solid #30323b; border-radius: 16px; padding: 8px; background: #18191f; box-shadow: 0 12px 30px #0003; }
 #message-input { min-height: 48px; border: 0; padding: 8px 10px; background: transparent; box-shadow: none; }
 .composer-actions { display: flex; align-items: center; padding: 0 2px 2px; }
+.rag-mode-control { display: flex; align-items: center; gap: 6px; color: #aeb0bc; font-size: 11px; }
+.rag-mode-control select { padding: 7px 9px; font-size: 11px; }
 .composer-actions .primary { padding: 9px 14px; }
 #start-task { order: -1; margin-right: auto; border: 0; color: #898d99; background: transparent; font-size: 11px; }
 

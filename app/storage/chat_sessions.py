@@ -52,7 +52,7 @@ class ChatSessionRepository(Protocol):
         session_id: str,
         user_content: str,
         assistant_content: str,
-        *, sources: list[dict] | None = None,
+        *, sources: list[dict] | None = None, mode: str | None = None,
     ) -> StoredSession: ...
 
     def append_command(self, session_id: str, command_text: str) -> StoredSession: ...
@@ -129,6 +129,7 @@ class SQLiteChatSessionRepository:
                     content TEXT NOT NULL,
                     is_refusal INTEGER NOT NULL DEFAULT 0,
                     sources_json TEXT NOT NULL DEFAULT '[]',
+                    rag_mode TEXT CHECK (rag_mode IN ('rag', 'plain') OR rag_mode IS NULL),
                     created_at TEXT NOT NULL,
                     UNIQUE (session_id, position)
                 );
@@ -186,6 +187,10 @@ class SQLiteChatSessionRepository:
                 connection.execute(
                     "ALTER TABLE chat_messages ADD COLUMN sources_json TEXT NOT NULL DEFAULT '[]'",
                 )
+            if "rag_mode" not in message_columns:
+                connection.execute(
+                    "ALTER TABLE chat_messages ADD COLUMN rag_mode TEXT",
+                )
 
     @staticmethod
     def _timestamp(value: datetime) -> str:
@@ -213,7 +218,7 @@ class SQLiteChatSessionRepository:
 
         message_rows = connection.execute(
             """
-            SELECT id, role, kind, content, created_at, is_refusal, sources_json
+            SELECT id, role, kind, content, created_at, is_refusal, sources_json, rag_mode
             FROM chat_messages
             WHERE session_id = ?
             ORDER BY position
@@ -229,6 +234,7 @@ class SQLiteChatSessionRepository:
                 created_at=self._datetime(message["created_at"]),
                 refusal=bool(message["is_refusal"]),
                 sources=tuple(json.loads(message["sources_json"])),
+                mode=message["rag_mode"],
             )
             for message in message_rows
         )
@@ -314,12 +320,15 @@ class SQLiteChatSessionRepository:
         session_id: str,
         user_content: str,
         assistant_content: str,
-        *, sources: list[dict] | None = None,
+        *, sources: list[dict] | None = None, mode: str | None = None,
     ) -> StoredSession:
         with self._connection() as connection:
             connection.execute("BEGIN IMMEDIATE")
             session = self._load_session(connection, session_id)
-            self._append_exchange(connection, session, user_content, assistant_content, sources=sources)
+            self._append_exchange(
+                connection, session, user_content, assistant_content,
+                sources=sources, mode=mode,
+            )
 
         return self.get(session_id)
 
@@ -366,6 +375,7 @@ class SQLiteChatSessionRepository:
         self, connection: sqlite3.Connection, session: StoredSession,
         user_content: str, assistant_content: str,
         *, refusal: bool = False, sources: list[dict] | None = None,
+        mode: str | None = None,
     ) -> None:
         timestamp = self._timestamp(datetime.now(timezone.utc))
         position = len(session.messages)
@@ -375,13 +385,13 @@ class SQLiteChatSessionRepository:
         connection.executemany(
             """
             INSERT INTO chat_messages
-                (id, session_id, position, role, content, created_at, is_refusal, sources_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                (id, session_id, position, role, content, created_at, is_refusal, sources_json, rag_mode)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
-                (str(uuid4()), session.id, position, "user", user_content, timestamp, int(refusal), "[]"),
+                (str(uuid4()), session.id, position, "user", user_content, timestamp, int(refusal), "[]", None),
                 (str(uuid4()), session.id, position + 1, "assistant", assistant_content, timestamp, int(refusal),
-                 json.dumps(sources or [], ensure_ascii=False)),
+                 json.dumps(sources or [], ensure_ascii=False), mode),
             ],
         )
         connection.execute(

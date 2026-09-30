@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 import pytest
 
 from app.agents.agent import Agent, AgentInputError, AgentMessage, AgentOutputError
+from app.indexing.store import DocumentIndexError
 from app.main import app, get_chat_session_service
 from app.services.chat_sessions import ChatSessionService, SQLiteChatSessionRepository
 
@@ -65,7 +66,9 @@ def test_frontend_keeps_composer_visible_and_sends_with_enter() -> None:
     assert 'id="memory-form"' not in markup
     assert 'id="followup-queue"' in markup
     assert "queuedMessages" in javascript
-    assert "enqueueMessage(content)" in javascript
+    assert "enqueueMessage(content, mode)" in javascript
+    assert 'id="rag-mode"' in markup
+    assert "strategy: documentStrategy.value, mode" in javascript
     assert 'kind: "pending"' in javascript
     assert "typing-indicator" in styles
     assert "input.disabled = value" not in javascript
@@ -104,6 +107,7 @@ def test_repository_migrates_existing_messages_to_message_kind(tmp_path: Path) -
             row[1] for row in connection.execute("PRAGMA table_info(chat_messages)")
         }
     assert "kind" in columns
+    assert "rag_mode" in columns
 
 
 def test_agent_applies_input_and_output_policies() -> None:
@@ -296,6 +300,13 @@ def test_clear_chat_database_removes_all_sessions(tmp_path: Path) -> None:
 
     assert response.status_code == 204
     assert service.list() == []
+
+
+def test_rag_mode_requires_configured_index(tmp_path: Path) -> None:
+    service = ChatSessionService(repository(tmp_path), Agent(FakeLanguageModel()))
+    session = service.create()
+    with pytest.raises(DocumentIndexError, match="Режим RAG не настроен"):
+        service.send(session.id, "Вопрос", mode="rag")
 
 
 def test_unknown_chat_session_returns_404(tmp_path: Path) -> None:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from ..agents.agent import Agent, AgentInputError, AgentMessage
 from ..indexing.rag import DocumentRag
+from ..indexing.store import DocumentIndexError
 from ..invariants import InvariantPolicy, InvariantViolation, SQLiteInvariantRepository
 from ..memory.extractor import MemoryExtractor
 from ..orchestration.profile_interviewer import ProfileInterviewer
@@ -85,6 +86,7 @@ class ChatSessionService:
             content=message.content,
             created_at=message.created_at,
             sources=list(message.sources),
+            mode=message.mode,
         )
 
     @classmethod
@@ -114,6 +116,7 @@ class ChatSessionService:
         profile: StoredProfile,
         policy: InvariantPolicy,
         strategy: str,
+        mode: str,
     ) -> ChatSendResponse:
         pending_request = self._pending_request(session)
         if pending_request is None:
@@ -131,7 +134,10 @@ class ChatSessionService:
         )
         policy.check_request(pending_request)
         active_profile = profile_context(profile)
-        hits = self._document_rag.retrieve(pending_request, [], strategy) if self._document_rag else []
+        hits = (
+            self._document_rag.retrieve(pending_request, [], strategy, force=True)
+            if mode == "rag" else []
+        )
         answer = self._agent.respond(
             [],
             pending_request,
@@ -141,7 +147,8 @@ class ChatSessionService:
         )
         sources = self._document_rag.cited_sources(answer, hits) if self._document_rag else []
         updated = self._repository.append_exchange(
-            session.id, content.strip(), policy.apply(answer), sources=sources,
+            session.id, content.strip(), policy.apply(answer),
+            sources=sources, mode=mode,
         )
         self._memory.remember(
             session_id=session.id,
@@ -155,14 +162,14 @@ class ChatSessionService:
 
     def _onboard(
         self, *, session: StoredSession, content: str, profile: StoredProfile,
-        policy: InvariantPolicy, strategy: str,
+        policy: InvariantPolicy, strategy: str, mode: str,
     ) -> ChatSendResponse:
         assert self._onboarding is not None
         result = self._onboarding.respond(profile, content)
         if result.answer is None:
             return self._finish_onboarding(
                 session=session, content=content, profile=result.profile, policy=policy,
-                strategy=strategy,
+                strategy=strategy, mode=mode,
             )
         return self._response(
             self._repository.append_exchange(session.id, content.strip(), policy.apply(result.answer)),
@@ -197,16 +204,26 @@ class ChatSessionService:
             self._profile_repository.get(profile_id)
         self._repository.clear(profile_id)
 
-    def send(self, session_id: str, content: str, strategy: str = "structure") -> ChatSendResponse:
+    def send(
+        self, session_id: str, content: str, strategy: str = "structure",
+        mode: str = "plain",
+    ) -> ChatSendResponse:
         if not content.strip():
             raise AgentInputError("Сообщение не должно быть пустым")
+        if mode not in {"rag", "plain"}:
+            raise AgentInputError("Неизвестный режим ответа")
+        if mode == "rag" and self._document_rag is None:
+            raise DocumentIndexError("Режим RAG не настроен")
         policy = self._policy()
         try:
-            return self._send(session_id, content, policy, strategy)
+            return self._send(session_id, content, policy, strategy, mode)
         except InvariantViolation as error:
             return self._refuse(session_id, content, error)
 
-    def _send(self, session_id: str, content: str, policy: InvariantPolicy, strategy: str) -> ChatSendResponse:
+    def _send(
+        self, session_id: str, content: str, policy: InvariantPolicy,
+        strategy: str, mode: str,
+    ) -> ChatSendResponse:
         session = self._repository.get(session_id)
         if session.task is not None and session.task.context.state != TaskState.DONE:
             ctx = session.task.context
@@ -227,7 +244,7 @@ class ChatSessionService:
                     content=content,
                     profile=stored_profile,
                     policy=policy,
-                    strategy=strategy,
+                    strategy=strategy, mode=mode,
                 )
             profile = profile_context(stored_profile)
         context: list[AgentMessage] = [
@@ -239,7 +256,10 @@ class ChatSessionService:
             session_id,
             session.profile_id,
         )
-        hits = self._document_rag.retrieve(content, context, strategy) if self._document_rag else []
+        hits = (
+            self._document_rag.retrieve(content, context, strategy, force=True)
+            if mode == "rag" else []
+        )
         answer = self._agent.respond(
             context,
             content,
@@ -249,7 +269,8 @@ class ChatSessionService:
         )
         sources = self._document_rag.cited_sources(answer, hits) if self._document_rag else []
         updated = self._repository.append_exchange(
-            session_id, content.strip(), policy.apply(answer), sources=sources,
+            session_id, content.strip(), policy.apply(answer),
+            sources=sources, mode=mode,
         )
         self._memory.remember(
             session_id=session_id,

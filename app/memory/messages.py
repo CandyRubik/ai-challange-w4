@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
 
 @dataclass(frozen=True, slots=True)
@@ -12,3 +12,4 @@ class StoredMessage:
     created_at: datetime
     refusal: bool = False
     sources: tuple[dict[str, Any], ...] = ()
+    mode: Literal["rag", "plain"] | None = None

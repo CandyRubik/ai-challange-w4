@@ -60,6 +60,7 @@ const documentsView = document.querySelector("#documents-view");
 const openDocumentsButton = document.querySelector("#open-documents-panel");
 const documentStatus = document.querySelector("#document-status");
 const documentStrategy = document.querySelector("#document-strategy");
+const ragMode = document.querySelector("#rag-mode");
 const documentStats = document.querySelector("#document-stats");
 const showProcessButton = document.querySelector("#show-task-process");
 const contextPanel = document.querySelector("#context-panel");
@@ -82,6 +83,7 @@ let controlBusy = false;
 let inspectorMode = "memory";
 let documentPoll = null;
 documentStrategy.value = localStorage.getItem("documentStrategy") === "fixed" ? "fixed" : "structure";
+ragMode.value = localStorage.getItem("ragMode") === "rag" ? "rag" : "plain";
 let renderedTaskSessionId = null;
 let taskOperation = null;
 let taskTimer = null;
@@ -683,10 +685,11 @@ function renderQueue() {
   }));
 }
 
-function enqueueMessage(content) {
+function enqueueMessage(content, mode) {
   queuedMessages.push({
     id: globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`,
     content,
+    mode,
   });
   renderQueue();
   status.textContent = `Агент отвечает · в очереди: ${queuedMessages.length}`;
@@ -817,7 +820,10 @@ function renderMessages(items, updateState = true) {
     renderMemory();
   }
   if (!items.length) {
-    messages.innerHTML = '<div class="empty"><span>✦</span><h2>Чем помочь?</h2><p>Напишите первую задачу. Перед работой агент коротко познакомится с вами.</p></div>';
+    const hint = activeProfile()?.onboarding_complete
+      ? "Задайте вопрос по книге или любую другую задачу."
+      : "Напишите первую задачу. Перед работой агент коротко познакомится с вами.";
+    messages.innerHTML = `<div class="empty"><span>✦</span><h2>Чем помочь?</h2><p>${hint}</p></div>`;
     return;
   }
   messages.replaceChildren(...items.map((message) => {
@@ -828,7 +834,8 @@ function renderMessages(items, updateState = true) {
     const label = document.createElement("span");
     label.textContent = kind === "command"
       ? "Команда памяти"
-      : (message.role === "user" ? "Вы" : (message.refusal ? "Отказ · Инварианты" : "Агент"));
+      : (message.role === "user" ? "Вы" : (message.refusal ? "Отказ · Инварианты" :
+        `Агент${message.mode === "rag" ? " · С RAG" : message.mode === "plain" ? " · Без RAG" : ""}`));
     let content;
     if (kind === "pending") {
       content = document.createElement("div");
@@ -867,7 +874,7 @@ async function loadDocumentStatus() {
   try {
     const data = await api("/api/document-index/status");
     const stateText = {
-      missing: data.pdf_present ? "Индекс ещё не создан. Задайте вопрос о книге в обычном чате." : "PDF отсутствует: положите официальный sample в data/documents/jcip-sample.pdf.",
+      missing: data.pdf_present ? "Индекс ещё не создан. Задайте вопрос в режиме «С RAG»." : "PDF отсутствует: положите официальный sample в data/documents/jcip-sample.pdf.",
       building: "Индекс строится. Первая загрузка модели может занять несколько минут.",
       ready: data.index ? `Индекс готов. Страниц в PDF: ${data.index.pages}. Модель: ${data.index.model}.` : "Индекс не найден.",
       error: `Ошибка: ${data.error}`,
@@ -988,18 +995,18 @@ async function openSession(sessionId) {
   }
 }
 
-async function sendChatMessage(content) {
+async function sendChatMessage(content, mode) {
   setBusy(true);
   const optimisticMessages = [
     ...currentMessages,
     { role: "user", kind: "message", content },
-    { role: "assistant", kind: "pending", content: "" },
+    { role: "assistant", kind: "pending", content: "", mode },
   ];
   renderMessages(optimisticMessages, false);
   try {
     const request = api(`/api/chat/sessions/${currentSessionId}/messages`, {
       method: "POST",
-      body: JSON.stringify({ content, strategy: documentStrategy.value }),
+      body: JSON.stringify({ content, strategy: documentStrategy.value, mode }),
     });
     if (!documentsView.hidden) void loadDocumentStatus();
     const result = await request;
@@ -1028,12 +1035,12 @@ async function sendChatMessage(content) {
   }
 }
 
-async function dispatchContent(content) {
+async function dispatchContent(content, mode) {
   const memoryCommand = parsedMemoryCommand(content);
   if (memoryCommand) {
     await executeMemoryCommand(memoryCommand);
   } else {
-    await sendChatMessage(content);
+    await sendChatMessage(content, mode);
   }
 }
 
@@ -1041,7 +1048,7 @@ async function drainQueue() {
   if (busy || !queuedMessages.length || !currentSessionId) return;
   const [next] = queuedMessages.splice(0, 1);
   renderQueue();
-  await dispatchContent(next.content);
+  await dispatchContent(next.content, next.mode);
 }
 
 async function createSession() {
@@ -1106,6 +1113,7 @@ async function loadProfiles() {
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   const content = input.value.trim();
+  const mode = ragMode.value;
   if (!content || !currentSessionId) return;
   const memoryCommand = parsedMemoryCommand(content);
   if (memoryCommand && !memoryCommand.content) {
@@ -1115,11 +1123,11 @@ form.addEventListener("submit", async (event) => {
   input.value = "";
   hideCommandMenu();
   if (busy) {
-    enqueueMessage(content);
+    enqueueMessage(content, mode);
     input.focus();
     return;
   }
-  await dispatchContent(content);
+  await dispatchContent(content, mode);
 });
 
 input.addEventListener("keydown", (event) => {
@@ -1345,6 +1353,7 @@ showProcessButton.addEventListener("click", () => {
 openMemoryButton.addEventListener("click", () => openInspector("memory"));
 openDocumentsButton.addEventListener("click", () => openInspector("documents"));
 documentStrategy.addEventListener("change", () => localStorage.setItem("documentStrategy", documentStrategy.value));
+ragMode.addEventListener("change", () => localStorage.setItem("ragMode", ragMode.value));
 closeContextButton.addEventListener("click", closeInspector);
 contextBackdrop.addEventListener("click", closeInspector);
 openNavigationButton.addEventListener("click", openNavigation);

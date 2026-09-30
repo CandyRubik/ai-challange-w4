@@ -322,7 +322,7 @@ def send_chat_message(
     service: ChatSessionService = Depends(get_chat_session_service),
 ) -> ChatSendResponse:
     try:
-        return service.send(session_id, request.content, request.strategy)
+        return service.send(session_id, request.content, request.strategy, request.mode)
     except ChatSessionNotFound:
         raise HTTPException(status_code=404, detail="Чат не найден") from None
     except ProfileNotFound:
