@@ -66,7 +66,7 @@ def run(output: Path, strategy: str) -> dict:
         repository = SQLiteChatSessionRepository(Path(temporary_directory) / "chat.sqlite3")
         service = ChatSessionService(
             repository, Agent(answer_model), document_rag=rag,
-            record_retrieval_comparison=False,
+            record_retrieval_comparison=False, grounded_answers=False,
         )
         results = []
         for case in questions:

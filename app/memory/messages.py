@@ -12,5 +12,7 @@ class StoredMessage:
     created_at: datetime
     refusal: bool = False
     sources: tuple[dict[str, Any], ...] = ()
+    citations: tuple[dict[str, Any], ...] = ()
     mode: Literal["rag", "plain"] | None = None
     retrieval: dict[str, Any] | None = None
+    grounding_status: Literal["answered", "insufficient_context", "grounding_failed"] | None = None

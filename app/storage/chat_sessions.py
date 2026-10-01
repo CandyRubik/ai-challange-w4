@@ -52,8 +52,9 @@ class ChatSessionRepository(Protocol):
         session_id: str,
         user_content: str,
         assistant_content: str,
-        *, sources: list[dict] | None = None, mode: str | None = None,
-        retrieval: dict | None = None,
+        *, sources: list[dict] | None = None, citations: list[dict] | None = None,
+        mode: str | None = None, retrieval: dict | None = None,
+        grounding_status: str | None = None,
     ) -> StoredSession: ...
 
     def append_command(self, session_id: str, command_text: str) -> StoredSession: ...
@@ -130,8 +131,10 @@ class SQLiteChatSessionRepository:
                     content TEXT NOT NULL,
                     is_refusal INTEGER NOT NULL DEFAULT 0,
                     sources_json TEXT NOT NULL DEFAULT '[]',
+                    citations_json TEXT NOT NULL DEFAULT '[]',
                     rag_mode TEXT CHECK (rag_mode IN ('rag', 'plain') OR rag_mode IS NULL),
                     retrieval_json TEXT,
+                    grounding_status TEXT,
                     created_at TEXT NOT NULL,
                     UNIQUE (session_id, position)
                 );
@@ -189,6 +192,10 @@ class SQLiteChatSessionRepository:
                 connection.execute(
                     "ALTER TABLE chat_messages ADD COLUMN sources_json TEXT NOT NULL DEFAULT '[]'",
                 )
+            if "citations_json" not in message_columns:
+                connection.execute(
+                    "ALTER TABLE chat_messages ADD COLUMN citations_json TEXT NOT NULL DEFAULT '[]'",
+                )
             if "rag_mode" not in message_columns:
                 connection.execute(
                     "ALTER TABLE chat_messages ADD COLUMN rag_mode TEXT",
@@ -196,6 +203,10 @@ class SQLiteChatSessionRepository:
             if "retrieval_json" not in message_columns:
                 connection.execute(
                     "ALTER TABLE chat_messages ADD COLUMN retrieval_json TEXT",
+                )
+            if "grounding_status" not in message_columns:
+                connection.execute(
+                    "ALTER TABLE chat_messages ADD COLUMN grounding_status TEXT",
                 )
 
     @staticmethod
@@ -225,7 +236,7 @@ class SQLiteChatSessionRepository:
         message_rows = connection.execute(
             """
             SELECT id, role, kind, content, created_at, is_refusal,
-                   sources_json, rag_mode, retrieval_json
+                   sources_json, citations_json, rag_mode, retrieval_json, grounding_status
             FROM chat_messages
             WHERE session_id = ?
             ORDER BY position
@@ -241,9 +252,11 @@ class SQLiteChatSessionRepository:
                 created_at=self._datetime(message["created_at"]),
                 refusal=bool(message["is_refusal"]),
                 sources=tuple(json.loads(message["sources_json"])),
+                citations=tuple(json.loads(message["citations_json"])),
                 mode=message["rag_mode"],
                 retrieval=json.loads(message["retrieval_json"])
                 if message["retrieval_json"] else None,
+                grounding_status=message["grounding_status"],
             )
             for message in message_rows
         )
@@ -329,15 +342,17 @@ class SQLiteChatSessionRepository:
         session_id: str,
         user_content: str,
         assistant_content: str,
-        *, sources: list[dict] | None = None, mode: str | None = None,
-        retrieval: dict | None = None,
+        *, sources: list[dict] | None = None, citations: list[dict] | None = None,
+        mode: str | None = None, retrieval: dict | None = None,
+        grounding_status: str | None = None,
     ) -> StoredSession:
         with self._connection() as connection:
             connection.execute("BEGIN IMMEDIATE")
             session = self._load_session(connection, session_id)
             self._append_exchange(
                 connection, session, user_content, assistant_content,
-                sources=sources, mode=mode, retrieval=retrieval,
+                sources=sources, citations=citations, mode=mode, retrieval=retrieval,
+                grounding_status=grounding_status,
             )
 
         return self.get(session_id)
@@ -385,7 +400,8 @@ class SQLiteChatSessionRepository:
         self, connection: sqlite3.Connection, session: StoredSession,
         user_content: str, assistant_content: str,
         *, refusal: bool = False, sources: list[dict] | None = None,
-        mode: str | None = None, retrieval: dict | None = None,
+        citations: list[dict] | None = None, mode: str | None = None,
+        retrieval: dict | None = None, grounding_status: str | None = None,
     ) -> None:
         timestamp = self._timestamp(datetime.now(timezone.utc))
         position = len(session.messages)
@@ -396,15 +412,17 @@ class SQLiteChatSessionRepository:
             """
             INSERT INTO chat_messages
                 (id, session_id, position, role, content, created_at, is_refusal,
-                 sources_json, rag_mode, retrieval_json)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 sources_json, citations_json, rag_mode, retrieval_json, grounding_status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 (str(uuid4()), session.id, position, "user", user_content,
-                 timestamp, int(refusal), "[]", None, None),
+                 timestamp, int(refusal), "[]", "[]", None, None, None),
                 (str(uuid4()), session.id, position + 1, "assistant", assistant_content, timestamp, int(refusal),
-                 json.dumps(sources or [], ensure_ascii=False), mode,
-                 json.dumps(retrieval, ensure_ascii=False) if retrieval is not None else None),
+                 json.dumps(sources or [], ensure_ascii=False),
+                 json.dumps(citations or [], ensure_ascii=False), mode,
+                 json.dumps(retrieval, ensure_ascii=False) if retrieval is not None else None,
+                 grounding_status),
             ],
         )
         connection.execute(

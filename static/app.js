@@ -919,7 +919,7 @@ function renderMessages(items, updateState = true) {
     label.textContent = kind === "command"
       ? "Команда памяти"
       : (message.role === "user" ? "Вы" : (message.refusal ? "Отказ · Инварианты" :
-        `Агент${message.mode === "rag" ? " · С RAG" : message.mode === "plain" ? " · Без RAG" : ""}`));
+        `Агент${message.mode === "rag" ? " · С RAG" : message.mode === "plain" ? " · Без RAG" : ""}${message.grounding_status === "insufficient_context" ? " · Не знаю" : message.grounding_status === "grounding_failed" ? " · Без подтверждения" : ""}`));
     let content;
     if (kind === "pending") {
       content = document.createElement("div");
@@ -947,6 +947,33 @@ function renderMessages(items, updateState = true) {
         sources.append(link);
       }
       article.append(sources);
+    }
+    if (message.role === "assistant" && message.citations?.length) {
+      const citations = document.createElement("div");
+      citations.className = "message-citations";
+      const heading = document.createElement("strong");
+      heading.textContent = "Цитаты из найденных фрагментов";
+      citations.append(heading);
+      for (const citation of message.citations) {
+        const source = message.sources.find((item) => item.chunk_id === citation.chunk_id);
+        if (!source) continue;
+        const quote = document.createElement("blockquote");
+        quote.textContent = citation.quote;
+        const link = document.createElement("a");
+        link.href = `${source.source}#page=${source.page_start}`;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = `${source.section} · ${source.chunk_id}`;
+        const item = document.createElement("div");
+        item.append(quote, link);
+        citations.append(item);
+      }
+      article.append(citations);
+    } else if (message.role === "assistant" && kind !== "pending" && message.mode === "rag" && message.grounding_status == null) {
+      const legacyNotice = document.createElement("div");
+      legacyNotice.className = "message-legacy-notice";
+      legacyNotice.textContent = "Этот ответ сохранён без проверенных цитат. Задайте вопрос заново; если цитаты не появились, перезапустите сервер.";
+      article.append(legacyNotice);
     }
     if (message.role === "assistant" && message.retrieval) {
       article.append(retrievalComparison(message.retrieval));

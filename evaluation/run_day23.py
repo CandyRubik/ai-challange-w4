@@ -111,7 +111,7 @@ def run(
                 if name in {"raw", "enhanced"} and not retrieval_only:
                     service = ChatSessionService(
                         repository, Agent(answer_model), document_rag=rag,
-                        record_retrieval_comparison=False,
+                        record_retrieval_comparison=False, grounded_answers=False,
                     )
                     session = service.create()
                     started = monotonic()

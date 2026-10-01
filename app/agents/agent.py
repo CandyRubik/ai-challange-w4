@@ -33,6 +33,13 @@ class LanguageModel(Protocol):
         max_tokens: int = 2_000,
     ) -> str: ...
 
+    def generate_json(
+        self,
+        *,
+        messages: Sequence[AgentMessage],
+        max_tokens: int = 2_000,
+    ) -> str: ...
+
 
 class AgentInputError(ValueError):
     """Agent input violates the configured policy."""
@@ -142,6 +149,32 @@ class Agent:
             ),
         )
 
+    def _response_messages(
+        self,
+        context: AgentContext,
+        current_message: str,
+        *,
+        orchestration: OrchestrationContext | None = None,
+        memory: MemoryContext | None = None,
+        profile: ProfileContext | None = None,
+        working_memory: Sequence[MemoryItem] = (),
+        long_term_memory: Sequence[MemoryItem] = (),
+        document_context: str = "",
+    ) -> list[AgentMessage]:
+        conversation = self._input_policy.apply(
+            context if self._context_enabled else [],
+            current_message,
+        )
+        return [
+            {
+                "role": "system",
+                "content": self._prompt(
+                    orchestration, memory, profile, working_memory, long_term_memory,
+                ) + ("\n\n" + document_context if document_context else ""),
+            },
+            *conversation,
+        ]
+
     def respond(
         self,
         context: AgentContext,
@@ -154,20 +187,30 @@ class Agent:
         long_term_memory: Sequence[MemoryItem] = (),
         document_context: str = "",
     ) -> str:
-        conversation = self._input_policy.apply(
-            context if self._context_enabled else [],
-            current_message,
-        )
         raw_answer = self._model.generate(
-            messages=[
-                {
-                    "role": "system",
-                    "content": self._prompt(
-                        orchestration, memory, profile, working_memory, long_term_memory,
-                    ) + ("\n\n" + document_context if document_context else ""),
-                },
-                *conversation,
-            ],
+            messages=self._response_messages(
+                context, current_message, orchestration=orchestration, memory=memory,
+                profile=profile, working_memory=working_memory,
+                long_term_memory=long_term_memory, document_context=document_context,
+            ),
+            max_tokens=self._max_tokens,
+        )
+        return self._output_policy.apply(raw_answer)
+
+    def respond_json(
+        self,
+        context: AgentContext,
+        current_message: str,
+        *,
+        orchestration: OrchestrationContext | None = None,
+        memory: MemoryContext | None = None,
+        document_context: str = "",
+    ) -> str:
+        raw_answer = self._model.generate_json(
+            messages=self._response_messages(
+                context, current_message, orchestration=orchestration, memory=memory,
+                document_context=document_context,
+            ),
             max_tokens=self._max_tokens,
         )
         return self._output_policy.apply(raw_answer)

@@ -63,6 +63,14 @@ class RewriteOnlyRouter:
 
 
 class ChatModel(Router):
+    def generate_json(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+        if "DOCUMENT_EXCERPTS" in messages[0]["content"]:
+            return json.dumps({"status": "answered", "claims": [{
+                "text": "Executor manages tasks.",
+                "evidence": [{"chunk_id": "structure-0000", "quote": "Executor manages tasks."}],
+            }]})
+        return super().generate_json(messages=messages, max_tokens=max_tokens)
+
     def generate(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
         assert "DOCUMENT_EXCERPTS" in messages[0]["content"]
         return "Executor manages tasks [DOC:structure-0000]."
@@ -149,9 +157,14 @@ def test_chat_uses_rag_and_persists_citations(tmp_path: Path) -> None:
     session = service.create()
     sent = service.send(session.id, "What is Executor?", mode="rag")
     assert sent.assistant_message.sources[0]["chunk_id"] == "structure-0000"
+    assert sent.assistant_message.citations == [
+        {"chunk_id": "structure-0000", "quote": "Executor manages tasks."},
+    ]
+    assert sent.assistant_message.grounding_status == "answered"
     assert sent.assistant_message.mode == "rag"
     assert sent.assistant_message.retrieval["raw"]["hits"]
     assert service.get(session.id).messages[-1].sources[0]["page_start"] == 3
+    assert service.get(session.id).messages[-1].citations == sent.assistant_message.citations
     assert service.get(session.id).messages[-1].mode == "rag"
 
 
@@ -198,6 +211,14 @@ def test_explicit_rag_falls_back_to_question_if_query_json_is_invalid() -> None:
 
 def test_chat_api_exposes_two_modes_and_rejects_unknown_mode(tmp_path: Path) -> None:
     class DualModeModel(Router):
+        def generate_json(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+            if "DOCUMENT_EXCERPTS" in messages[0]["content"]:
+                return json.dumps({"status": "answered", "claims": [{
+                    "text": "Книга описывает Executor.",
+                    "evidence": [{"chunk_id": "structure-0000", "quote": "Executor manages tasks."}],
+                }]})
+            return super().generate_json(messages=messages, max_tokens=max_tokens)
+
         def generate(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
             if "DOCUMENT_EXCERPTS" in messages[0]["content"]:
                 return "Книга описывает Executor [DOC:structure-0000]."
@@ -234,6 +255,7 @@ def test_chat_api_exposes_two_modes_and_rejects_unknown_mode(tmp_path: Path) -> 
     assert rag.json()["assistant_message"]["mode"] == "rag"
     assert rag.json()["assistant_message"]["retrieval"]["active"]["hits"]
     assert len(rag.json()["assistant_message"]["sources"]) == 1
+    assert rag.json()["assistant_message"]["citations"][0]["quote"] == "Executor manages tasks."
     assert invalid.status_code == 422
     assert [message["mode"] for message in history.json()["messages"]] == [
         None, "plain", None, "rag",
