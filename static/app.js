@@ -814,6 +814,90 @@ function renderSessions() {
   }));
 }
 
+function retrievalHit(hit, showRelevance = false, reason = "") {
+  const item = document.createElement("li");
+  const link = document.createElement("a");
+  link.href = `${hit.source}#page=${hit.page}`;
+  link.target = "_blank";
+  link.rel = "noopener noreferrer";
+  link.textContent = `${hit.section} · PDF с. ${hit.page}`;
+  const score = document.createElement("small");
+  const relevance = showRelevance && hit.relevance !== null
+    ? ` · релевантность ${hit.relevance.toFixed(3)}` : "";
+  score.textContent = `${relevance} · similarity ${hit.similarity.toFixed(3)}${reason}`;
+  item.append(link, score);
+  return item;
+}
+
+function retrievalMode(title, query, hits, stats, showRelevance = false) {
+  const card = document.createElement("div");
+  card.className = "retrieval-mode";
+  const heading = document.createElement("strong");
+  heading.textContent = title;
+  const count = document.createElement("div");
+  count.className = "retrieval-count";
+  count.textContent = stats;
+  const queryText = document.createElement("div");
+  queryText.className = "retrieval-query";
+  queryText.textContent = `Запрос: ${query}`;
+  card.append(heading, count, queryText);
+  if (hits.length) {
+    const list = document.createElement("ol");
+    list.className = "retrieval-hit-list";
+    list.append(...hits.map((hit) => retrievalHit(hit, showRelevance)));
+    card.append(list);
+  } else {
+    const empty = document.createElement("div");
+    empty.className = "retrieval-empty";
+    empty.textContent = "Фрагменты не прошли отбор.";
+    card.append(empty);
+  }
+  return card;
+}
+
+function retrievalComparison(data) {
+  const details = document.createElement("details");
+  details.className = "message-retrieval";
+  const summary = document.createElement("summary");
+  summary.textContent = `Как отобраны фрагменты · raw ${data.raw.hits.length} → RAG ${data.active.hits.length} из ${data.active.candidate_count}`;
+  details.append(summary);
+  const body = document.createElement("div");
+  body.className = "retrieval-body";
+  const modes = document.createElement("div");
+  modes.className = "retrieval-modes";
+  modes.append(
+    retrievalMode("Исходный поиск (raw)", data.raw.query, data.raw.hits,
+      `Первые ${data.raw.candidate_count} по similarity`),
+    retrievalMode("Текущий RAG", data.active.query, data.active.hits,
+      `${data.active.candidate_count} кандидатов → ${data.active.hits.length} в контексте${data.active.threshold === null ? "" : ` · порог ${data.active.threshold}`}`,
+      data.active.filter_relevance),
+  );
+  body.append(modes);
+  if (data.active.rejected.length) {
+    const discarded = document.createElement("details");
+    discarded.className = "retrieval-rejected";
+    const label = document.createElement("summary");
+    label.textContent = `Не вошли в контекст: ${data.active.rejected.length}`;
+    const list = document.createElement("ol");
+    list.className = "retrieval-hit-list";
+    const reasons = {
+      identifier: " · нет технического термина",
+      threshold: " · ниже порога",
+      top_k: " · вне top-K",
+    };
+    list.append(...data.active.rejected.map((hit) =>
+      retrievalHit(hit, data.active.filter_relevance, reasons[hit.reason] || "")));
+    discarded.append(label, list);
+    body.append(discarded);
+  }
+  const note = document.createElement("div");
+  note.className = "retrieval-note";
+  note.textContent = "Ответ использует фрагменты «Текущий RAG». Ссылки у ответа показывают только процитированные фрагменты; raw рассчитан для сравнения поиска.";
+  body.append(note);
+  details.append(body);
+  return details;
+}
+
 function renderMessages(items, updateState = true) {
   if (updateState) {
     currentMessages = items;
@@ -864,6 +948,9 @@ function renderMessages(items, updateState = true) {
       }
       article.append(sources);
     }
+    if (message.role === "assistant" && message.retrieval) {
+      article.append(retrievalComparison(message.retrieval));
+    }
     return article;
   }));
   renderTaskActivity(currentSession?.task);
@@ -888,6 +975,11 @@ async function loadDocumentStatus() {
         card.textContent = `${name}: ${stats.chunks} чанков · в среднем ${stats.avg_tokens.toLocaleString("ru-RU")} токенов · диапазон ${stats.min_tokens}–${stats.max_tokens}`;
         documentStats.append(card);
       }
+    }
+    if (data.retrieval) {
+      const card = document.createElement("article");
+      card.textContent = `RAG: top-${data.retrieval.candidate_k} → reranker (${data.retrieval.reranker_model}, порог ${data.retrieval.min_relevance_score}) → top-${data.retrieval.final_k}`;
+      documentStats.append(card);
     }
     if ((data.state === "building" || (data.state === "missing" && busy)) && !documentPoll) {
       documentPoll = setInterval(() => { void loadDocumentStatus(); }, 3000);

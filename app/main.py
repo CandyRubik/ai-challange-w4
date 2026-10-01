@@ -10,7 +10,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .agents.agent import Agent, AgentInputError, AgentOutputError
-from .indexing.rag import DocumentRag
+from .indexing.rag import DocumentRag, RetrievalSettings
+from .indexing.rerank import LocalCrossEncoderReranker
 from .indexing.corpus import DEFAULT_PDF
 from .indexing.store import DEFAULT_INDEX_DIR, DocumentIndex, DocumentIndexError
 from .invariants import (
@@ -113,6 +114,7 @@ def get_chat_session_service() -> ChatSessionService:
         invariant_repository=get_invariant_repository(),
         document_rag=DocumentRag(
             get_document_index(), DeepSeekProvider(thinking_enabled=False),
+            reranker=get_document_reranker(), settings=RetrievalSettings.from_env(),
         ),
     )
 
@@ -124,9 +126,23 @@ def get_document_index() -> DocumentIndex:
     return DocumentIndex(root=root, pdf_path=pdf)
 
 
+@lru_cache(maxsize=1)
+def get_document_reranker() -> LocalCrossEncoderReranker:
+    return LocalCrossEncoderReranker()
+
+
 @app.get("/api/document-index/status")
 def document_index_status(index: DocumentIndex = Depends(get_document_index)) -> dict:
-    return index.status()
+    settings = RetrievalSettings.from_env()
+    return {
+        **index.status(),
+        "retrieval": {
+            "candidate_k": settings.candidate_k,
+            "final_k": settings.final_k,
+            "min_relevance_score": settings.min_relevance_score,
+            "reranker_model": get_document_reranker().model_name,
+        },
+    }
 
 
 @lru_cache(maxsize=1)

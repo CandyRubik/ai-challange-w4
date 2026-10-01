@@ -1,0 +1,24 @@
+{
+  "report_sha256": "bec981194f6047393dae39d7671369b3b00ec55a8729d38654b9f1badaf68a80",
+  "rubric": {
+    "facts": "Все ключевые пункты expected присутствуют, нет существенной ошибки.",
+    "citations": "Каждая ссылка поддерживает относящееся к ней утверждение; на отрицательном вопросе нет ссылок на книгу."
+  },
+  "cases": [
+    {"id": 1, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба объяснили последовательную обработку и ожидание следующих запросов."},
+    {"id": 2, "raw_facts": false, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Raw назвал неограниченный рост потоков, но пропустил задержку создания и уничтожения; enhanced привёл оба аспекта."},
+    {"id": 3, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба перечислили решения execution policy."},
+    {"id": 4, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба объяснили цикл рабочего потока и переиспользование."},
+    {"id": 5, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба верно различили shutdown и shutdownNow."},
+    {"id": 6, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба объяснили один поток Timer и влияние исключения."},
+    {"id": 7, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба раскрыли Callable, Future и ограничение Runnable."},
+    {"id": 8, "raw_facts": false, "enhanced_facts": false, "raw_citations": false, "enhanced_citations": false, "note": "Оба ошибочно написали, что обычный poll() блокируется. По Java API poll() сразу возвращает null, если результата нет; ожидать может timed poll()."},
+    {"id": 9, "raw_facts": false, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Raw нашёл только вводный абзац и не описал timed invokeAll; enhanced привёл invokeAll, общий лимит и обработку незавершённых задач."},
+    {"id": 10, "raw_facts": true, "enhanced_facts": true, "raw_citations": false, "enhanced_citations": true, "note": "Raw признал отсутствие данных, но процитировал три нерелевантных чанка; enhanced не процитировал ни одного."},
+    {"id": 11, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба отказались приписывать книге Project Loom и virtual threads без ссылок."},
+    {"id": 12, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба признали отсутствие подтверждения Reactor backpressure без ссылок."},
+    {"id": 13, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба не приписали книге Python asyncio и не дали ссылок."},
+    {"id": 14, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба не приписали книге CompletableFuture.thenCompose и не дали ссылок."},
+    {"id": 15, "raw_facts": true, "enhanced_facts": true, "raw_citations": true, "enhanced_citations": true, "note": "Оба не сослались на книгу как на источник прогноза погоды."}
+  ]
+}

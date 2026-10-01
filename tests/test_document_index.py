@@ -14,13 +14,16 @@ pytest.importorskip("faiss")
 
 from app.indexing.chunking import fixed_chunks, structured_chunks
 from app.indexing.corpus import Page
-from app.indexing.rag import DocumentRag
+from app.indexing.rag import DocumentRag, RetrievalSettings
 from app.indexing.store import DocumentIndex, DocumentIndexError
 from app.indexing.store import SearchHit
 from app.agents.agent import Agent
 from app.main import app, get_chat_session_service
 from app.services.chat_sessions import ChatSessionService
 from app.storage.chat_sessions import SQLiteChatSessionRepository
+
+
+LEGACY_SETTINGS = RetrievalSettings(filter_relevance=False, candidate_k=3)
 
 
 class WordTokenizer:
@@ -111,7 +114,7 @@ def test_index_persists_two_strategies_and_rag_sources(tmp_path: Path, monkeypat
     pdf.touch()
     root = tmp_path / "index"
     index = DocumentIndex(root, pdf, FakeEmbedder())
-    rag = DocumentRag(index, Router())
+    rag = DocumentRag(index, Router(), settings=LEGACY_SETTINGS)
     assert index.status()["state"] == "missing"
     assert rag.retrieve("What is Executor?", [], "structure")
     manifest = index.status()["index"]
@@ -123,7 +126,7 @@ def test_index_persists_two_strategies_and_rag_sources(tmp_path: Path, monkeypat
     hits = reopened.search("Executor", "structure")
     assert len(hits) == 3
     assert hits[0].metadata["source"].startswith("https://")
-    rag = DocumentRag(reopened, Router())
+    rag = DocumentRag(reopened, Router(), settings=LEGACY_SETTINGS)
     routed = rag.retrieve("What is Executor?", [], "structure")
     assert routed
     answer = f"Executor is described in [DOC:{routed[0].metadata['chunk_id']}]."
@@ -142,11 +145,12 @@ def test_index_persists_two_strategies_and_rag_sources(tmp_path: Path, monkeypat
 def test_chat_uses_rag_and_persists_citations(tmp_path: Path) -> None:
     repository = SQLiteChatSessionRepository(tmp_path / "chat.sqlite3")
     model = ChatModel()
-    service = ChatSessionService(repository, Agent(model), document_rag=DocumentRag(ReadyIndex(), model))
+    service = ChatSessionService(repository, Agent(model), document_rag=DocumentRag(ReadyIndex(), model, settings=LEGACY_SETTINGS))
     session = service.create()
     sent = service.send(session.id, "What is Executor?", mode="rag")
     assert sent.assistant_message.sources[0]["chunk_id"] == "structure-0000"
     assert sent.assistant_message.mode == "rag"
+    assert sent.assistant_message.retrieval["raw"]["hits"]
     assert service.get(session.id).messages[-1].sources[0]["page_start"] == 3
     assert service.get(session.id).messages[-1].mode == "rag"
 
@@ -160,19 +164,20 @@ def test_plain_mode_skips_router_and_index_and_persists_mode(tmp_path: Path) -> 
     index = DocumentIndex(tmp_path / "index", tmp_path / "missing.pdf", FakeEmbedder())
     service = ChatSessionService(
         SQLiteChatSessionRepository(tmp_path / "chat.sqlite3"),
-        Agent(PlainModel()), document_rag=DocumentRag(index, Router()),
+        Agent(PlainModel()), document_rag=DocumentRag(index, Router(), settings=LEGACY_SETTINGS),
     )
     session = service.create()
     sent = service.send(session.id, "Что сказано в книге?", mode="plain")
     assert sent.assistant_message.mode == "plain"
     assert sent.assistant_message.sources == []
+    assert sent.assistant_message.retrieval is None
     assert service.get(session.id).messages[-1].mode == "plain"
     assert index.status()["state"] == "missing"
 
 
 def test_explicit_rag_searches_even_when_router_declines() -> None:
     index = ReadyIndex()
-    hits = DocumentRag(index, RewriteOnlyRouter()).retrieve(
+    hits = DocumentRag(index, RewriteOnlyRouter(), settings=LEGACY_SETTINGS).retrieve(
         "Как ограничивают ожидание?", [], "structure", force=True,
     )
     assert hits
@@ -185,7 +190,7 @@ def test_explicit_rag_falls_back_to_question_if_query_json_is_invalid() -> None:
             return "not json"
 
     index = ReadyIndex()
-    assert DocumentRag(index, BrokenRouter()).retrieve(
+    assert DocumentRag(index, BrokenRouter(), settings=LEGACY_SETTINGS).retrieve(
         "Executor question", [], "structure", force=True,
     )
     assert index.queries == ["Executor question"]
@@ -201,7 +206,7 @@ def test_chat_api_exposes_two_modes_and_rejects_unknown_mode(tmp_path: Path) -> 
     model = DualModeModel()
     service = ChatSessionService(
         SQLiteChatSessionRepository(tmp_path / "chat.sqlite3"),
-        Agent(model), document_rag=DocumentRag(ReadyIndex(), model),
+        Agent(model), document_rag=DocumentRag(ReadyIndex(), model, settings=LEGACY_SETTINGS),
     )
     session = service.create()
     app.dependency_overrides[get_chat_session_service] = lambda: service
@@ -227,6 +232,7 @@ def test_chat_api_exposes_two_modes_and_rejects_unknown_mode(tmp_path: Path) -> 
     assert plain.json()["assistant_message"]["mode"] == "plain"
     assert plain.json()["assistant_message"]["sources"] == []
     assert rag.json()["assistant_message"]["mode"] == "rag"
+    assert rag.json()["assistant_message"]["retrieval"]["active"]["hits"]
     assert len(rag.json()["assistant_message"]["sources"]) == 1
     assert invalid.status_code == 422
     assert [message["mode"] for message in history.json()["messages"]] == [
@@ -239,7 +245,7 @@ def test_unrelated_question_does_not_build_index(tmp_path: Path) -> None:
     rag = DocumentRag(index, UnrelatedRouter())
     assert rag.retrieve("Какая погода завтра?", [], "structure") == []
     assert index.status()["state"] == "missing"
-    assert rag.context([]) == ""
+    assert "NO_RELEVANT_DOCUMENT_EXCERPTS" in rag.context([])
 
 
 def test_first_relevant_question_reports_missing_pdf(tmp_path: Path) -> None:

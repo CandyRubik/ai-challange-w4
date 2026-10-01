@@ -16,7 +16,7 @@ from tempfile import TemporaryDirectory
 from time import monotonic
 
 from app.agents.agent import Agent
-from app.indexing.rag import DocumentRag
+from app.indexing.rag import DocumentRag, RetrievalSettings
 from app.indexing.store import DocumentIndex, SearchHit
 from app.providers.deepseek import DeepSeekProvider
 from app.services.chat_sessions import ChatSessionService
@@ -55,11 +55,19 @@ def run(output: Path, strategy: str) -> dict:
     recording_index = RecordingIndex(index)
     answer_model = DeepSeekProvider()
     query_model = DeepSeekProvider(thinking_enabled=False)
-    rag = DocumentRag(recording_index, query_model)
+    rag = DocumentRag(
+        recording_index, query_model,
+        settings=RetrievalSettings(
+            preserve_terms=False, filter_relevance=False, candidate_k=3,
+        ),
+    )
 
     with TemporaryDirectory(prefix="day22-rag-") as temporary_directory:
         repository = SQLiteChatSessionRepository(Path(temporary_directory) / "chat.sqlite3")
-        service = ChatSessionService(repository, Agent(answer_model), document_rag=rag)
+        service = ChatSessionService(
+            repository, Agent(answer_model), document_rag=rag,
+            record_retrieval_comparison=False,
+        )
         results = []
         for case in questions:
             answers = {}
