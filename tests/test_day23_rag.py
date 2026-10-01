@@ -75,6 +75,27 @@ def test_reranker_filters_and_limits_candidates_using_original_question() -> Non
     ]
 
 
+def test_named_example_can_use_its_following_chunk() -> None:
+    candidates = [
+        hit("structure-0006", "An unrelated server example."),
+        hit("structure-0007", "ThreadPerTaskWebServer creates a thread per request."),
+        hit("structure-0008", "The request handler can run concurrently."),
+    ]
+    rag = DocumentRag(
+        CandidateIndex(candidates), RewriteModel(),
+        reranker=FakeReranker([0.95, 0.8, 0.9]),
+        settings=RetrievalSettings(rewrite=False, candidate_k=3, final_k=2,
+                                   min_relevance_score=0.07),
+    )
+
+    selected = rag.retrieve("Почему ThreadPerTaskWebServer нужен потокобезопасный обработчик?",
+                            [], "structure", force=True)
+
+    assert [item.metadata["chunk_id"] for item in selected] == [
+        "structure-0008", "structure-0007",
+    ]
+
+
 def test_no_relevant_hits_yield_explicit_no_evidence_answer(tmp_path: Path) -> None:
     class AnswerModel(RewriteModel):
         def generate(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
@@ -89,7 +110,7 @@ def test_no_relevant_hits_yield_explicit_no_evidence_answer(tmp_path: Path) -> N
     )
     service = ChatSessionService(
         SQLiteChatSessionRepository(tmp_path / "chat.sqlite3"), Agent(model),
-        document_rag=rag,
+        document_rag=rag, grounded_answers=False,
     )
     session = service.create()
     response = service.send(session.id, "Есть ли в книге Kotlin coroutines?", mode="rag")
@@ -118,7 +139,7 @@ def test_rag_message_persists_raw_vs_selected_sources(tmp_path: Path) -> None:
     )
     database = tmp_path / "chat.sqlite3"
     service = ChatSessionService(SQLiteChatSessionRepository(database), Agent(AnswerModel()),
-                                 document_rag=rag)
+                                 document_rag=rag, grounded_answers=False)
     session = service.create()
     response = service.send(session.id, "Что сказано про Timer?", mode="rag")
 

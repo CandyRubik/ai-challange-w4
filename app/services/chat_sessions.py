@@ -1,10 +1,12 @@
 from __future__ import annotations
 
-from ..agents.agent import Agent, AgentInputError, AgentMessage
+from ..agents.agent import Agent, AgentInputError, AgentMessage, AgentOutputError
 from ..indexing.comparison import retrieval_comparison
+from ..indexing.grounding import GroundedAnswer, GroundingError, validate_grounded_answer
 from ..indexing.rag import DocumentRag, RetrievalTrace
 from ..indexing.store import DocumentIndexError, SearchHit
-from ..invariants import InvariantPolicy, InvariantViolation, SQLiteInvariantRepository
+from ..invariants import InvariantPolicy, InvariantViolation, SQLiteInvariantRepository, sentence_count
+from ..memory.context import MemoryContext
 from ..memory.extractor import MemoryExtractor
 from ..orchestration.profile_interviewer import ProfileInterviewer
 from ..memory.runtime import MemoryRuntime
@@ -38,6 +40,7 @@ class ChatSessionService:
         *, invariant_repository: SQLiteInvariantRepository | None = None,
         document_rag: DocumentRag | None = None,
         record_retrieval_comparison: bool = True,
+        grounded_answers: bool = True,
     ) -> None:
         self._repository = repository
         self._invariants = invariant_repository
@@ -52,6 +55,7 @@ class ChatSessionService:
         )
         self._document_rag = document_rag
         self._record_retrieval_comparison = record_retrieval_comparison
+        self._grounded_answers = grounded_answers
 
     def _policy(self) -> InvariantPolicy:
         return InvariantPolicy(self._invariants.get() if self._invariants is not None else None)
@@ -89,8 +93,10 @@ class ChatSessionService:
             content=message.content,
             created_at=message.created_at,
             sources=list(message.sources),
+            citations=list(message.citations),
             mode=message.mode,
             retrieval=message.retrieval,
+            grounding_status=message.grounding_status,
         )
 
     def _document_hits(
@@ -111,6 +117,51 @@ class ChatSessionService:
             self._document_rag.index, traces[0], self._document_rag.settings, strategy,
         )
         return hits, comparison
+
+    def _answer(
+        self, context: list[AgentMessage], content: str,
+        *, orchestration: OrchestrationContext, memory: MemoryContext,
+        hits: list[SearchHit], mode: str,
+    ) -> tuple[str, list[dict], list[dict], str | None]:
+        if mode == "rag" and self._grounded_answers:
+            assert self._document_rag is not None
+            if not hits:
+                grounded = GroundedAnswer.unknown()
+            else:
+                invariants = orchestration.invariants
+                max_claims = (
+                    min(5, invariants.max_sentences)
+                    if invariants is not None and invariants.sentence_limit_enabled else 5
+                )
+                for retry in (False, True):
+                    try:
+                        raw = self._agent.respond_json(
+                            context, content, orchestration=orchestration, memory=memory,
+                            document_context=self._document_rag.grounded_prompt(
+                                hits, retry=retry, max_claims=max_claims,
+                            ),
+                        )
+                        grounded = validate_grounded_answer(raw, hits)
+                        if (
+                            grounded.status == "answered"
+                            and invariants is not None
+                            and invariants.sentence_limit_enabled
+                            and sentence_count(grounded.content) > invariants.max_sentences
+                        ):
+                            raise GroundingError("Ответ превышает лимит предложений")
+                        break
+                    except (AgentOutputError, GroundingError):
+                        if retry:
+                            grounded = GroundedAnswer.failed()
+            return (
+                grounded.content, grounded.sources, grounded.citations, grounded.status,
+            )
+        answer = self._agent.respond(
+            context, content, orchestration=orchestration, memory=memory,
+            document_context=self._document_rag.context(hits) if mode == "rag" else "",
+        )
+        sources = self._document_rag.cited_sources(answer, hits) if mode == "rag" else []
+        return answer, sources, [], None
 
     @classmethod
     def _response(cls, updated: StoredSession) -> ChatSendResponse:
@@ -158,17 +209,15 @@ class ChatSessionService:
         policy.check_request(pending_request)
         active_profile = profile_context(profile)
         hits, comparison = self._document_hits(pending_request, [], strategy, mode)
-        answer = self._agent.respond(
-            [],
-            pending_request,
+        answer, sources, citations, grounding_status = self._answer(
+            [], pending_request,
             orchestration=OrchestrationContext(profile=active_profile, invariants=policy.settings),
-            memory=memory,
-            document_context=self._document_rag.context(hits) if mode == "rag" else "",
+            memory=memory, hits=hits, mode=mode,
         )
-        sources = self._document_rag.cited_sources(answer, hits) if self._document_rag else []
         updated = self._repository.append_exchange(
             session.id, content.strip(), policy.apply(answer),
-            sources=sources, mode=mode, retrieval=comparison,
+            sources=sources, citations=citations, mode=mode, retrieval=comparison,
+            grounding_status=grounding_status,
         )
         self._memory.remember(
             session_id=session.id,
@@ -277,17 +326,15 @@ class ChatSessionService:
             session.profile_id,
         )
         hits, comparison = self._document_hits(content, context, strategy, mode)
-        answer = self._agent.respond(
-            context,
-            content,
+        answer, sources, citations, grounding_status = self._answer(
+            context, content,
             orchestration=OrchestrationContext(profile=profile, invariants=policy.settings),
-            memory=memory,
-            document_context=self._document_rag.context(hits) if mode == "rag" else "",
+            memory=memory, hits=hits, mode=mode,
         )
-        sources = self._document_rag.cited_sources(answer, hits) if self._document_rag else []
         updated = self._repository.append_exchange(
             session_id, content.strip(), policy.apply(answer),
-            sources=sources, mode=mode, retrieval=comparison,
+            sources=sources, citations=citations, mode=mode, retrieval=comparison,
+            grounding_status=grounding_status,
         )
         self._memory.remember(
             session_id=session_id,

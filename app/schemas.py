@@ -32,8 +32,10 @@ class ChatMessage(StrictModel):
     content: str
     created_at: datetime
     sources: list[dict] = Field(default_factory=list)
+    citations: list[dict] = Field(default_factory=list)
     mode: Literal["rag", "plain"] | None = None
     retrieval: dict | None = None
+    grounding_status: Literal["answered", "insufficient_context", "grounding_failed"] | None = None
 
 
 class TaskStartRequest(StrictModel):

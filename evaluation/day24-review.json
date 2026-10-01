@@ -1,0 +1,20 @@
+{
+  "report_sha256": "6ee57b20768838ab29b5f6433673ea1b86604df73c5dfe417982ce73c42c8a67",
+  "rubric": {
+    "semantic_support": "Каждый фактический тезис следует из прикреплённой к нему цитаты; наличие дословного совпадения само по себе недостаточно.",
+    "complete": "Ответ покрывает все пункты expected без существенного пропуска.",
+    "abstention_appropriate": "На отрицательном вопросе ответ сообщает «не знаю», просит уточнение и не приписывает книге отсутствующие данные."
+  },
+  "cases": [
+    {"id": 1, "semantic_support": true, "complete": true, "abstention_appropriate": null, "note": "Оба ключевых действия сервера подтверждены; последний тезис использует цитаты из двух соседних чанков."},
+    {"id": 2, "semantic_support": true, "complete": true, "abstention_appropriate": null, "note": "Потокобезопасность и одновременные вызовы прямо указаны в следующем чанке раздела."},
+    {"id": 3, "semantic_support": true, "complete": false, "abstention_appropriate": null, "note": "Цитата подтверждает параллельную отрисовку текста; ответ не упомянул последующее ожидание Future.get из ожидаемого результата."},
+    {"id": 4, "semantic_support": true, "complete": true, "abstention_appropriate": null, "note": "Убывающая отдача, разные размеры задач, пример с 9% и накладные расходы подтверждены отдельными цитатами."},
+    {"id": 5, "semantic_support": true, "complete": true, "abstention_appropriate": null, "note": "Отдельные задачи для изображений и отрисовка по готовности подтверждены."},
+    {"id": 6, "semantic_support": true, "complete": true, "abstention_appropriate": null, "note": "Подсчёт отправленных и полученных результатов дословно описан в цитате."},
+    {"id": 7, "semantic_support": true, "complete": true, "abstention_appropriate": null, "note": "Отмена задачи и реклама по умолчанию прямо следуют из цитаты."},
+    {"id": 8, "semantic_support": null, "complete": null, "abstention_appropriate": true, "note": "Найденные фрагменты не содержат точного размера пула для сервера с 64 ядрами; ответ без ссылок."},
+    {"id": 9, "semantic_support": null, "complete": null, "abstention_appropriate": true, "note": "StructuredTaskScope отсутствует в выбранных фрагментах; ответ без ссылок."},
+    {"id": 10, "semantic_support": null, "complete": null, "abstention_appropriate": true, "note": "Rust Tokio отсутствует в выбранных фрагментах; ответ без ссылок."}
+  ]
+}
