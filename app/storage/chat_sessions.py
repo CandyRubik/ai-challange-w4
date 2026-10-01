@@ -53,6 +53,7 @@ class ChatSessionRepository(Protocol):
         user_content: str,
         assistant_content: str,
         *, sources: list[dict] | None = None, mode: str | None = None,
+        retrieval: dict | None = None,
     ) -> StoredSession: ...
 
     def append_command(self, session_id: str, command_text: str) -> StoredSession: ...
@@ -130,6 +131,7 @@ class SQLiteChatSessionRepository:
                     is_refusal INTEGER NOT NULL DEFAULT 0,
                     sources_json TEXT NOT NULL DEFAULT '[]',
                     rag_mode TEXT CHECK (rag_mode IN ('rag', 'plain') OR rag_mode IS NULL),
+                    retrieval_json TEXT,
                     created_at TEXT NOT NULL,
                     UNIQUE (session_id, position)
                 );
@@ -191,6 +193,10 @@ class SQLiteChatSessionRepository:
                 connection.execute(
                     "ALTER TABLE chat_messages ADD COLUMN rag_mode TEXT",
                 )
+            if "retrieval_json" not in message_columns:
+                connection.execute(
+                    "ALTER TABLE chat_messages ADD COLUMN retrieval_json TEXT",
+                )
 
     @staticmethod
     def _timestamp(value: datetime) -> str:
@@ -218,7 +224,8 @@ class SQLiteChatSessionRepository:
 
         message_rows = connection.execute(
             """
-            SELECT id, role, kind, content, created_at, is_refusal, sources_json, rag_mode
+            SELECT id, role, kind, content, created_at, is_refusal,
+                   sources_json, rag_mode, retrieval_json
             FROM chat_messages
             WHERE session_id = ?
             ORDER BY position
@@ -235,6 +242,8 @@ class SQLiteChatSessionRepository:
                 refusal=bool(message["is_refusal"]),
                 sources=tuple(json.loads(message["sources_json"])),
                 mode=message["rag_mode"],
+                retrieval=json.loads(message["retrieval_json"])
+                if message["retrieval_json"] else None,
             )
             for message in message_rows
         )
@@ -321,13 +330,14 @@ class SQLiteChatSessionRepository:
         user_content: str,
         assistant_content: str,
         *, sources: list[dict] | None = None, mode: str | None = None,
+        retrieval: dict | None = None,
     ) -> StoredSession:
         with self._connection() as connection:
             connection.execute("BEGIN IMMEDIATE")
             session = self._load_session(connection, session_id)
             self._append_exchange(
                 connection, session, user_content, assistant_content,
-                sources=sources, mode=mode,
+                sources=sources, mode=mode, retrieval=retrieval,
             )
 
         return self.get(session_id)
@@ -375,7 +385,7 @@ class SQLiteChatSessionRepository:
         self, connection: sqlite3.Connection, session: StoredSession,
         user_content: str, assistant_content: str,
         *, refusal: bool = False, sources: list[dict] | None = None,
-        mode: str | None = None,
+        mode: str | None = None, retrieval: dict | None = None,
     ) -> None:
         timestamp = self._timestamp(datetime.now(timezone.utc))
         position = len(session.messages)
@@ -385,13 +395,16 @@ class SQLiteChatSessionRepository:
         connection.executemany(
             """
             INSERT INTO chat_messages
-                (id, session_id, position, role, content, created_at, is_refusal, sources_json, rag_mode)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (id, session_id, position, role, content, created_at, is_refusal,
+                 sources_json, rag_mode, retrieval_json)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
-                (str(uuid4()), session.id, position, "user", user_content, timestamp, int(refusal), "[]", None),
+                (str(uuid4()), session.id, position, "user", user_content,
+                 timestamp, int(refusal), "[]", None, None),
                 (str(uuid4()), session.id, position + 1, "assistant", assistant_content, timestamp, int(refusal),
-                 json.dumps(sources or [], ensure_ascii=False), mode),
+                 json.dumps(sources or [], ensure_ascii=False), mode,
+                 json.dumps(retrieval, ensure_ascii=False) if retrieval is not None else None),
             ],
         )
         connection.execute(

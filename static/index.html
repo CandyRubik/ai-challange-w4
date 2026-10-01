@@ -6,7 +6,7 @@
     <meta name="description" content="Чат с агентом и автоматической трёхслойной памятью" />
     <title>AI Challenge W4</title>
     <link rel="icon" href="data:," />
-    <link rel="stylesheet" href="/styles.css?v=day22-rag-modes" />
+    <link rel="stylesheet" href="/styles.css?v=day23-chat-retrieval" />
   </head>
   <body>
     <main class="chat-shell">
@@ -147,7 +147,7 @@
           <p id="document-status" role="status">Проверяю индекс…</p>
           <label for="document-strategy">Стратегия чанкинга</label>
           <select id="document-strategy"><option value="structure">По разделам и страницам</option><option value="fixed">Фиксированный размер</option></select>
-          <p>Стратегия применяется к следующему вопросу в режиме «С RAG». Режим «Без RAG» не обращается к индексу.</p>
+          <p>Стратегия применяется к следующему вопросу в режиме «С RAG». После поиска reranker проверяет релевантность и отбрасывает слабые результаты. Режим «Без RAG» не обращается к индексу.</p>
           <div id="document-stats" class="document-stats"></div>
         </section>
         <section id="memory-view" class="memory-panel" role="tabpanel" aria-labelledby="memory-tab">
@@ -310,6 +310,6 @@
         </footer>
       </form>
     </dialog>
-    <script src="/app.js?v=day22-demo-copy" defer></script>
+    <script src="/app.js?v=day23-chat-retrieval" defer></script>
   </body>
 </html>

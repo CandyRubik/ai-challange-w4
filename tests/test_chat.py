@@ -108,6 +108,7 @@ def test_repository_migrates_existing_messages_to_message_kind(tmp_path: Path) -
         }
     assert "kind" in columns
     assert "rag_mode" in columns
+    assert "retrieval_json" in columns
 
 
 def test_agent_applies_input_and_output_policies() -> None:

@@ -33,6 +33,7 @@ class ChatMessage(StrictModel):
     created_at: datetime
     sources: list[dict] = Field(default_factory=list)
     mode: Literal["rag", "plain"] | None = None
+    retrieval: dict | None = None
 
 
 class TaskStartRequest(StrictModel):

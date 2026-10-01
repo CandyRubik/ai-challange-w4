@@ -13,3 +13,4 @@ class StoredMessage:
     refusal: bool = False
     sources: tuple[dict[str, Any], ...] = ()
     mode: Literal["rag", "plain"] | None = None
+    retrieval: dict[str, Any] | None = None
