@@ -1,0 +1,42 @@
+[
+  {
+    "id": "executor",
+    "title": "От сервера с потоком на запрос к Executor",
+    "goal_contains": "ThreadPerTaskWebServer",
+    "constraint_final_contains": "подробно",
+    "turns": [
+      {"message": "Моя цель в этом чате — объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor.", "expect": "statement"},
+      {"message": "Ограничение по длине ответа: пока отвечай кратко.", "expect": "statement"},
+      {"message": "Для этого разговора под «старым сервером» я имею в виду ThreadPerTaskWebServer.", "expect": "statement"},
+      {"message": "Как последовательный сервер обрабатывает соединения?", "expect": "document", "query": "single threaded web server sequentially handles connections"},
+      {"message": "Что меняется, когда старый сервер создаёт поток для каждого соединения?", "expect": "document", "query": "ThreadPerTaskWebServer creates new thread for each request"},
+      {"message": "Почему обработчик запросов должен быть потокобезопасным?", "expect": "document", "query": "ThreadPerTaskWebServer request handler thread safe concurrent requests"},
+      {"message": "Поправка к ограничению по длине: теперь отвечай подробно, а не кратко.", "expect": "statement"},
+      {"message": "Какие издержки возникают при создании отдельного потока на каждую задачу?", "expect": "document", "query": "drawbacks of unbounded thread creation thread per task"},
+      {"message": "Как Executor отделяет отправку задачи от политики её выполнения?", "expect": "document", "query": "Executor separates task submission from execution policy"},
+      {"message": "Что делает ExecutorService при shutdown?", "expect": "document", "query": "ExecutorService shutdown stops accepting new tasks completes submitted tasks"},
+      {"message": "Какую цель и ограничение по длине я зафиксировал?", "expect": "state", "query": "Executor task goal constraints"},
+      {"message": "Подведи итог перехода от ThreadPerTaskWebServer к Executor на основе книги.", "expect": "document", "query": "ThreadPerTaskWebServer drawbacks Executor benefits task execution policy"}
+    ]
+  },
+  {
+    "id": "renderer",
+    "title": "От FutureRenderer к CompletionService",
+    "goal_contains": "FutureRenderer",
+    "constraint_final_contains": "опытные",
+    "turns": [
+      {"message": "Моя цель — разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы.", "expect": "statement"},
+      {"message": "Аудитория моего объяснения — начинающие студенты.", "expect": "statement"},
+      {"message": "Под «изображениями» в этом разговоре я понимаю картинки, которые загрузчик скачивает для страницы.", "expect": "statement"},
+      {"message": "Что FutureRenderer делает одновременно с загрузкой изображений?", "expect": "document", "query": "FutureRenderer render text while downloading images"},
+      {"message": "Что происходит, когда FutureRenderer вызывает Future.get?", "expect": "document", "query": "FutureRenderer Future.get waits for downloaded images"},
+      {"message": "Почему ожидание всех изображений может задержать отображение уже загруженных?", "expect": "document", "query": "FutureRenderer waits for all images before rendering"},
+      {"message": "Исправление: аудитория теперь опытные Java-разработчики, не студенты.", "expect": "statement"},
+      {"message": "Как CompletionService возвращает результаты отдельных задач?", "expect": "document", "query": "CompletionService take completed task results completion queue"},
+      {"message": "Как Renderer с CompletionService отображает готовые изображения?", "expect": "document", "query": "Renderer CompletionService displays each image as it becomes available"},
+      {"message": "Что книга говорит о cooperative scheduling в Rust Tokio?", "expect": "unsupported", "query": "Rust Tokio cooperative scheduling"},
+      {"message": "Напомни мою цель и аудиторию объяснения.", "expect": "state", "query": "FutureRenderer CompletionService task goal audience"},
+      {"message": "Сравни FutureRenderer и Renderer с CompletionService по времени отображения изображений.", "expect": "document", "query": "FutureRenderer waits images Renderer CompletionService displays images as available"}
+    ]
+  }
+]

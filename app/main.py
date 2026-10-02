@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from functools import lru_cache
 import os
 from pathlib import Path
@@ -26,6 +27,10 @@ from .providers.deepseek import (
     LlmConfigurationError,
     LlmRequestError,
 )
+from .rag_chat.models import RagSendRequest, RagSession, RagSessionSummary, RagTurn
+from .rag_chat.service import RagChatService
+from .rag_chat.state import TurnInterpreter
+from .rag_chat.store import RagChatNotFound, RagTurnConflict, SQLiteRagChatRepository
 from .schemas import (
     ChatSendRequest,
     ChatSendResponse,
@@ -116,6 +121,22 @@ def get_chat_session_service() -> ChatSessionService:
             get_document_index(), DeepSeekProvider(thinking_enabled=False),
             reranker=get_document_reranker(), settings=RetrievalSettings.from_env(),
         ),
+    )
+
+
+@lru_cache(maxsize=1)
+def get_rag_chat_service() -> RagChatService:
+    database_path = os.getenv("CHAT_DB_PATH") or str(DEFAULT_CHAT_DB_PATH)
+    fast_model = DeepSeekProvider(thinking_enabled=False)
+    return RagChatService(
+        SQLiteRagChatRepository(database_path),
+        TurnInterpreter(fast_model),
+        DocumentRag(
+            get_document_index(), fast_model,
+            reranker=get_document_reranker(),
+            settings=replace(RetrievalSettings.from_env(), rewrite=False),
+        ),
+        Agent(DeepSeekProvider()),
     )
 
 
@@ -389,6 +410,67 @@ def task_action(
         raise HTTPException(status_code=502, detail=str(error)) from None
     except LlmConfigurationError:
         raise HTTPException(status_code=503, detail="DEEPSEEK_API_KEY не задан") from None
+
+
+@app.post("/api/rag-chat/sessions", response_model=RagSession, status_code=201)
+def create_rag_chat(service: RagChatService = Depends(get_rag_chat_service)) -> RagSession:
+    return service.create()
+
+
+@app.get("/api/rag-chat/sessions", response_model=list[RagSessionSummary])
+def list_rag_chats(
+    service: RagChatService = Depends(get_rag_chat_service),
+) -> list[RagSessionSummary]:
+    return service.list()
+
+
+@app.get("/api/rag-chat/sessions/{session_id}", response_model=RagSession)
+def get_rag_chat(
+    session_id: str, service: RagChatService = Depends(get_rag_chat_service),
+) -> RagSession:
+    try:
+        return service.get(session_id)
+    except RagChatNotFound:
+        raise HTTPException(status_code=404, detail="RAG-чат не найден") from None
+
+
+@app.delete("/api/rag-chat/sessions/{session_id}", status_code=204)
+def delete_rag_chat(
+    session_id: str, service: RagChatService = Depends(get_rag_chat_service),
+) -> Response:
+    try:
+        service.delete(session_id)
+    except RagChatNotFound:
+        raise HTTPException(status_code=404, detail="RAG-чат не найден") from None
+    return Response(status_code=204)
+
+
+@app.post("/api/rag-chat/sessions/{session_id}/turns", response_model=RagTurn)
+def send_rag_chat_turn(
+    session_id: str, request: RagSendRequest,
+    service: RagChatService = Depends(get_rag_chat_service),
+) -> RagTurn:
+    try:
+        return service.send(session_id, request.content)
+    except RagChatNotFound:
+        raise HTTPException(status_code=404, detail="RAG-чат не найден") from None
+    except RagTurnConflict as error:
+        raise HTTPException(status_code=409, detail=str(error)) from None
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from None
+
+
+@app.post("/api/rag-chat/sessions/{session_id}/turns/{turn_id}/retry", response_model=RagTurn)
+def retry_rag_chat_turn(
+    session_id: str, turn_id: str,
+    service: RagChatService = Depends(get_rag_chat_service),
+) -> RagTurn:
+    try:
+        return service.retry(session_id, turn_id)
+    except RagChatNotFound:
+        raise HTTPException(status_code=404, detail="RAG-чат не найден") from None
+    except RagTurnConflict as error:
+        raise HTTPException(status_code=409, detail=str(error)) from None
 
 
 STATIC_ROOT = Path(__file__).resolve().parents[1] / "static"
