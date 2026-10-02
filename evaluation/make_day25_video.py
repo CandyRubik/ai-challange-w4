@@ -1,4 +1,4 @@
-"""Render a silent, UI-style Day 25 video from the recorded offline run.
+"""Render a silent, UI-style Day 25 video from a recorded evaluation run.
 
 Usage: python -m evaluation.make_day25_video
 Requires rsvg-convert and ffmpeg. No external API calls are made.
@@ -16,7 +16,7 @@ from textwrap import wrap
 from xml.sax.saxutils import escape
 
 
-DEFAULT_REPORT = Path(__file__).with_name("day25-offline-evaluation.json")
+DEFAULT_REPORT = Path(__file__).with_name("day25-evaluation.json")
 DEFAULT_OUTPUT = Path("artifacts/day25-rag-memory-chat.mp4")
 GREEN = "#83d8bd"
 WHITE = "#ecf1f7"
@@ -42,7 +42,7 @@ def lines(x: int, y: int, content: str, *, width: int = 70, size: int = 22,
     )
 
 
-def slide(number: int, title: str, subtitle: str, detail: str) -> str:
+def slide(number: int, title: str, subtitle: str, detail: str, footer: str) -> str:
     return f'''<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="900">
     {box(0, 0, 1440, 900, "#0c121d")}
     <circle cx="1200" cy="100" r="320" fill="#173b35" opacity=".45"/>
@@ -52,12 +52,12 @@ def slide(number: int, title: str, subtitle: str, detail: str) -> str:
     {lines(100, 450, subtitle, size=31, color="#b9d4cc")}
     {box(100, 540, 1240, 150, "#182b35", stroke="#39695d")}
     {lines(135, 625, detail, size=29)}
-    {lines(100, 830, "Офлайн-демо: сценарная модель · локальный индекс · проверенные источники", size=21, color=MUTED)}
+    {lines(100, 830, footer, size=21, color=MUTED)}
     {lines(1290, 830, f"{number}/4", size=21, color=MUTED)}
     </svg>'''
 
 
-def chat_slide(scenario: dict) -> str:
+def chat_slide(scenario: dict, mode_label: str) -> str:
     turn = scenario["turns"][-1]["turn"]
     state = scenario["final_state"]
     source = next(item for item in turn["sources"] if item["kind"] == "document")
@@ -85,7 +85,7 @@ def chat_slide(scenario: dict) -> str:
     {lines(345, 184, "ВЫ · 12", size=14, color=GREEN)}
     {lines(345, 217, turn["content"], width=67, size=20, gap=27, limit=2)}
     {box(295, 298, 776, 421, "#182536", stroke="#304354")}
-    {lines(319, 331, "RAG-ЧАТ · ОФЛАЙН-ПРОГОН", size=14, color=GREEN)}
+    {lines(319, 331, "RAG-ЧАТ · " + mode_label, size=14, color=GREEN)}
     {lines(319, 368, turn["answer"], width=73, size=18, gap=26, limit=5)}
     {box(319, 500, 728, 1, "#314454")}
     {lines(319, 532, "ИСТОЧНИКИ", size=15, color="#b8d9ca")}
@@ -118,18 +118,23 @@ def make_video(report_path: Path, output: Path) -> None:
         if not shutil.which(command):
             raise RuntimeError(f"Для видео нужен {command}")
     report = json.loads(report_path.read_text(encoding="utf-8"))
-    if report.get("mode") != "offline_scripted" or len(report["scenarios"]) != 2:
-        raise ValueError("Ожидался офлайн-отчёт двух сценариев")
+    if report.get("mode") not in {"offline_scripted", "live_deepseek"} or len(report["scenarios"]) != 2:
+        raise ValueError("Ожидался отчёт двух сценариев")
     if not all(all(row["checks"].values()) for scenario in report["scenarios"]
                for row in scenario["turns"]):
         raise ValueError("В отчёте есть непройденные проверки")
+    live = report["mode"] == "live_deepseek"
+    footer = ("Демо по записи: ответы DeepSeek · локальный индекс · проверенные цитаты"
+              if live else
+              "Офлайн-демо: сценарная модель · локальный индекс · проверенные источники")
+    mode_label = "ЖИВОЙ ПРОГОН DEEPSEEK" if live else "ОФЛАЙН-ПРОГОН"
     frames = [
         slide(1, "RAG-чат с памятью задачи", "Отдельный экран, история и источники",
-              "2 диалога по 12 сообщений · 48/48 контрактных проверок"),
-        chat_slide(report["scenarios"][0]),
-        chat_slide(report["scenarios"][1]),
+              "2 диалога по 12 сообщений · 48/48 контрактных проверок", footer),
+        chat_slide(report["scenarios"][0], mode_label),
+        chat_slide(report["scenarios"][1], mode_label),
         slide(4, "Цель остаётся в памяти", "После выхода старых сообщений из окна модели",
-              "Цель и исправление: 2/2 · Вне корпуса: отказ без ссылок"),
+              "Цель и исправление: 2/2 · Вне корпуса: отказ без ссылок", footer),
     ]
     output.parent.mkdir(parents=True, exist_ok=True)
     with TemporaryDirectory(prefix="day25-video-") as temporary_directory:

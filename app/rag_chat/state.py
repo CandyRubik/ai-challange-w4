@@ -91,7 +91,7 @@ Return JSON only. Example for 'Моя цель — объяснить Executor �
         except (ValidationError, ValueError, TypeError) as error:
             raise InterpretationError("Не удалось разобрать сообщение") from error
         if decision.kind == "question" and not decision.search_question.strip():
-            raise InterpretationError("Для вопроса отсутствует поисковый запрос")
+            decision = decision.model_copy(update={"search_question": message.strip()[:500]})
         if decision.kind == "clarification_needed" and (
             not decision.clarification.strip()
             or decision.goal_action != "keep"

@@ -28,7 +28,7 @@ from .providers.deepseek import (
     LlmRequestError,
 )
 from .rag_chat.models import RagSendRequest, RagSession, RagSessionSummary, RagTurn
-from .rag_chat.service import RagChatService
+from .rag_chat.service import GROUNDING_SYSTEM_PROMPT, RagChatService
 from .rag_chat.state import TurnInterpreter
 from .rag_chat.store import RagChatNotFound, RagTurnConflict, SQLiteRagChatRepository
 from .schemas import (
@@ -136,7 +136,8 @@ def get_rag_chat_service() -> RagChatService:
             reranker=get_document_reranker(),
             settings=replace(RetrievalSettings.from_env(), rewrite=False),
         ),
-        Agent(DeepSeekProvider()),
+        Agent(DeepSeekProvider(thinking_enabled=False),
+              system_prompt=GROUNDING_SYSTEM_PROMPT, max_tokens=3_000),
     )
 
 

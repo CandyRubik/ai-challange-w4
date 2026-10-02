@@ -1,5 +1,5 @@
 {
-  "created_at": "2026-10-02T14:24:50.406823+00:00",
+  "created_at": "2026-10-02T14:56:33.539330+00:00",
   "mode": "offline_scripted",
   "answer_model": "offline-extractive",
   "embedding_model": "intfloat/multilingual-e5-small",
@@ -12,15 +12,15 @@
     {
       "id": "executor",
       "title": "От сервера с потоком на запрос к Executor",
-      "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+      "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
       "turns": [
         {
           "position": 1,
           "user": "Моя цель в этом чате — объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor.",
           "expected": "statement",
           "turn": {
-            "id": "086407ad-9454-4c0b-9519-4d5ea5311025",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "ff67f676-a369-426f-bc6e-aae0700cc841",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 1,
             "content": "Моя цель в этом чате — объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor.",
             "answer": "Уточнение сохранено.",
@@ -31,15 +31,15 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "086407ad-9454-4c0b-9519-4d5ea5311025",
+                "message_id": "ff67f676-a369-426f-bc6e-aae0700cc841",
                 "title": "Сообщение пользователя · уточнение"
               }
             ],
             "citations": [],
             "grounding_status": "statement",
             "error": null,
-            "created_at": "2026-10-02T14:24:50.412583Z",
-            "updated_at": "2026-10-02T14:24:50.414135Z"
+            "created_at": "2026-10-02T14:56:33.542358Z",
+            "updated_at": "2026-10-02T14:56:33.543321Z"
           },
           "search_queries": [],
           "selected_chunk_ids": [],
@@ -47,7 +47,7 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [],
             "terms": [],
@@ -65,8 +65,8 @@
           "user": "Ограничение по длине ответа: пока отвечай кратко.",
           "expected": "statement",
           "turn": {
-            "id": "ba0ff4c2-345b-4646-96af-a270e01b8f65",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "9e31229a-6818-4bbf-aae2-c534b88f9f12",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 2,
             "content": "Ограничение по длине ответа: пока отвечай кратко.",
             "answer": "Уточнение сохранено.",
@@ -77,15 +77,15 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "ba0ff4c2-345b-4646-96af-a270e01b8f65",
+                "message_id": "9e31229a-6818-4bbf-aae2-c534b88f9f12",
                 "title": "Сообщение пользователя · уточнение"
               }
             ],
             "citations": [],
             "grounding_status": "statement",
             "error": null,
-            "created_at": "2026-10-02T14:24:50.417152Z",
-            "updated_at": "2026-10-02T14:24:50.419328Z"
+            "created_at": "2026-10-02T14:56:33.544277Z",
+            "updated_at": "2026-10-02T14:56:33.545351Z"
           },
           "search_queries": [],
           "selected_chunk_ids": [],
@@ -93,13 +93,13 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "кратко",
-                "source_message_id": "ba0ff4c2-345b-4646-96af-a270e01b8f65"
+                "source_message_id": "9e31229a-6818-4bbf-aae2-c534b88f9f12"
               }
             ],
             "terms": [],
@@ -117,8 +117,8 @@
           "user": "Для этого разговора под «старым сервером» я имею в виду ThreadPerTaskWebServer.",
           "expected": "statement",
           "turn": {
-            "id": "6ce304d5-7688-406f-8599-bdde1d518ab1",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "1555bdb7-ee37-4fc2-91a9-6588af5da076",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 3,
             "content": "Для этого разговора под «старым сервером» я имею в виду ThreadPerTaskWebServer.",
             "answer": "Уточнение сохранено.",
@@ -129,15 +129,15 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1",
+                "message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076",
                 "title": "Сообщение пользователя · уточнение"
               }
             ],
             "citations": [],
             "grounding_status": "statement",
             "error": null,
-            "created_at": "2026-10-02T14:24:50.421298Z",
-            "updated_at": "2026-10-02T14:24:50.422996Z"
+            "created_at": "2026-10-02T14:56:33.546447Z",
+            "updated_at": "2026-10-02T14:56:33.547474Z"
           },
           "search_queries": [],
           "selected_chunk_ids": [],
@@ -145,20 +145,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "кратко",
-                "source_message_id": "ba0ff4c2-345b-4646-96af-a270e01b8f65"
+                "source_message_id": "9e31229a-6818-4bbf-aae2-c534b88f9f12"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -175,8 +175,8 @@
           "user": "Как последовательный сервер обрабатывает соединения?",
           "expected": "document",
           "turn": {
-            "id": "9bbccaca-07cb-4875-a69b-764f692f29e6",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "724934b3-dcac-4f66-b13a-8433714644fe",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 4,
             "content": "Как последовательный сервер обрабатывает соединения?",
             "answer": "В найденном фрагменте сказано: «There are a number of possible policies for scheduling tasks within an applica- tion, some of which exploit the potential for concurrency better than others. Th». [DOC:structure-0004]",
@@ -203,8 +203,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:24:50.425064Z",
-            "updated_at": "2026-10-02T14:24:59.488007Z"
+            "created_at": "2026-10-02T14:56:33.548330Z",
+            "updated_at": "2026-10-02T14:56:38.335924Z"
           },
           "search_queries": [
             "single threaded web server sequentially handles connections"
@@ -218,20 +218,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "кратко",
-                "source_message_id": "ba0ff4c2-345b-4646-96af-a270e01b8f65"
+                "source_message_id": "9e31229a-6818-4bbf-aae2-c534b88f9f12"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -241,15 +241,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 9.06
+          "seconds": 4.79
         },
         {
           "position": 5,
           "user": "Что меняется, когда старый сервер создаёт поток для каждого соединения?",
           "expected": "document",
           "turn": {
-            "id": "04b87f8d-16df-4358-b14c-fb1e4c6c17cf",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "681f4b96-0444-489a-b593-113312c14353",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 5,
             "content": "Что меняется, когда старый сервер создаёт поток для каждого соединения?",
             "answer": "В найденном фрагменте сказано: «A more responsive approach is to create a new thread for ser vicing each request, as shown in ThreadPerTaskWebServer in Listing 6.2. class ThreadPerTaskWebServe». [DOC:structure-0007]",
@@ -276,8 +276,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:24:59.493363Z",
-            "updated_at": "2026-10-02T14:24:59.979703Z"
+            "created_at": "2026-10-02T14:56:38.337743Z",
+            "updated_at": "2026-10-02T14:56:38.647065Z"
           },
           "search_queries": [
             "ThreadPerTaskWebServer creates new thread for each request"
@@ -290,20 +290,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "кратко",
-                "source_message_id": "ba0ff4c2-345b-4646-96af-a270e01b8f65"
+                "source_message_id": "9e31229a-6818-4bbf-aae2-c534b88f9f12"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -313,15 +313,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.49
+          "seconds": 0.31
         },
         {
           "position": 6,
           "user": "Почему обработчик запросов должен быть потокобезопасным?",
           "expected": "document",
           "turn": {
-            "id": "288d3c89-4261-4c04-99de-391f02cc8f00",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "5a808fa8-4e13-4e43-95ad-a4c66ec60a39",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 6,
             "content": "Почему обработчик запросов должен быть потокобезопасным?",
             "answer": "В найденном фрагменте сказано: «A more responsive approach is to create a new thread for ser vicing each request, as shown in ThreadPerTaskWebServer in Listing 6.2. class ThreadPerTaskWebServe». [DOC:structure-0007]",
@@ -348,8 +348,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:24:59.982192Z",
-            "updated_at": "2026-10-02T14:25:00.440512Z"
+            "created_at": "2026-10-02T14:56:38.649054Z",
+            "updated_at": "2026-10-02T14:56:38.951691Z"
           },
           "search_queries": [
             "ThreadPerTaskWebServer request handler thread safe concurrent requests"
@@ -362,20 +362,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "кратко",
-                "source_message_id": "ba0ff4c2-345b-4646-96af-a270e01b8f65"
+                "source_message_id": "9e31229a-6818-4bbf-aae2-c534b88f9f12"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -385,15 +385,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.46
+          "seconds": 0.3
         },
         {
           "position": 7,
           "user": "Поправка к ограничению по длине: теперь отвечай подробно, а не кратко.",
           "expected": "statement",
           "turn": {
-            "id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "6b603403-a04d-4dc4-86df-616861ceef98",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 7,
             "content": "Поправка к ограничению по длине: теперь отвечай подробно, а не кратко.",
             "answer": "Уточнение сохранено.",
@@ -404,15 +404,15 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc",
+                "message_id": "6b603403-a04d-4dc4-86df-616861ceef98",
                 "title": "Сообщение пользователя · уточнение"
               }
             ],
             "citations": [],
             "grounding_status": "statement",
             "error": null,
-            "created_at": "2026-10-02T14:25:00.444115Z",
-            "updated_at": "2026-10-02T14:25:00.446478Z"
+            "created_at": "2026-10-02T14:56:38.953543Z",
+            "updated_at": "2026-10-02T14:56:38.954590Z"
           },
           "search_queries": [],
           "selected_chunk_ids": [],
@@ -420,20 +420,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "подробно",
-                "source_message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc"
+                "source_message_id": "6b603403-a04d-4dc4-86df-616861ceef98"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -450,8 +450,8 @@
           "user": "Какие издержки возникают при создании отдельного потока на каждую задачу?",
           "expected": "document",
           "turn": {
-            "id": "78e9aa57-35ec-4826-a2ba-d6aefed25136",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "568340b8-be11-491f-ac10-eb0217ebe420",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 8,
             "content": "Какие издержки возникают при создании отдельного потока на каждую задачу?",
             "answer": "В найденном фрагменте сказано: «For production use, however, the thread-per-task approach has some practical drawbacks, especially when a large number of threads may be created: Thread lifecyc». [DOC:structure-0010]",
@@ -478,8 +478,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:00.448639Z",
-            "updated_at": "2026-10-02T14:25:00.862654Z"
+            "created_at": "2026-10-02T14:56:38.955548Z",
+            "updated_at": "2026-10-02T14:56:39.239208Z"
           },
           "search_queries": [
             "drawbacks of unbounded thread creation thread per task"
@@ -493,20 +493,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "подробно",
-                "source_message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc"
+                "source_message_id": "6b603403-a04d-4dc4-86df-616861ceef98"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -516,15 +516,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.42
+          "seconds": 0.28
         },
         {
           "position": 9,
           "user": "Как Executor отделяет отправку задачи от политики её выполнения?",
           "expected": "document",
           "turn": {
-            "id": "e32e6ee3-9a32-4a3a-8eeb-526ddfe77311",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "092b0ef2-f294-447e-aa7b-149c5db646ee",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 9,
             "content": "Как Executor отделяет отправку задачи от политики её выполнения?",
             "answer": "В найденном фрагменте сказано: «6.2.TheExecutor framework 119 public class WithinThreadExecutor implements Executor { public void execute (Runnable r) { r.run(); }; } Listing 6.6. Executor tha». [DOC:structure-0020]",
@@ -551,8 +551,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:00.865815Z",
-            "updated_at": "2026-10-02T14:25:01.272303Z"
+            "created_at": "2026-10-02T14:56:39.241159Z",
+            "updated_at": "2026-10-02T14:56:39.548263Z"
           },
           "search_queries": [
             "Executor separates task submission from execution policy"
@@ -566,20 +566,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "подробно",
-                "source_message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc"
+                "source_message_id": "6b603403-a04d-4dc4-86df-616861ceef98"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -589,15 +589,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.41
+          "seconds": 0.31
         },
         {
           "position": 10,
           "user": "Что делает ExecutorService при shutdown?",
           "expected": "document",
           "turn": {
-            "id": "31654ebb-c2fb-40e5-8faf-192397842c15",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "ff7ef823-65b3-4373-a1a3-f9cab3fcb004",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 10,
             "content": "Что делает ExecutorService при shutdown?",
             "answer": "В найденном фрагменте сказано: «task submission). The lifecycle man- agement methods of ExecutorService are shown in Listing 6.7. public interface ExecutorService extends Executor { void shutd». [DOC:structure-0028]",
@@ -624,8 +624,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:01.274469Z",
-            "updated_at": "2026-10-02T14:25:01.642008Z"
+            "created_at": "2026-10-02T14:56:39.550235Z",
+            "updated_at": "2026-10-02T14:56:39.880462Z"
           },
           "search_queries": [
             "ExecutorService shutdown stops accepting new tasks completes submitted tasks"
@@ -639,20 +639,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "подробно",
-                "source_message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc"
+                "source_message_id": "6b603403-a04d-4dc4-86df-616861ceef98"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -662,15 +662,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.37
+          "seconds": 0.33
         },
         {
           "position": 11,
           "user": "Какую цель и ограничение по длине я зафиксировал?",
           "expected": "state",
           "turn": {
-            "id": "a2bdc06a-ba5e-459c-bb1c-28dc7974ceb4",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "acd883c8-ed89-4008-80a4-17d67791bfba",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 11,
             "content": "Какую цель и ограничение по длине я зафиксировал?",
             "answer": "goal: Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor\nlength: подробно\nстарый сервер: ThreadPerTaskWebServer",
@@ -681,25 +681,25 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "086407ad-9454-4c0b-9519-4d5ea5311025",
+                "message_id": "ff67f676-a369-426f-bc6e-aae0700cc841",
                 "title": "Сообщение пользователя · goal"
               },
               {
                 "kind": "message",
-                "message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc",
+                "message_id": "6b603403-a04d-4dc4-86df-616861ceef98",
                 "title": "Сообщение пользователя · length"
               },
               {
                 "kind": "message",
-                "message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1",
+                "message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076",
                 "title": "Сообщение пользователя · старый сервер"
               }
             ],
             "citations": [],
             "grounding_status": "state",
             "error": null,
-            "created_at": "2026-10-02T14:25:01.644018Z",
-            "updated_at": "2026-10-02T14:25:01.989438Z"
+            "created_at": "2026-10-02T14:56:39.883490Z",
+            "updated_at": "2026-10-02T14:56:40.186986Z"
           },
           "search_queries": [
             "Executor task goal constraints"
@@ -713,20 +713,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "подробно",
-                "source_message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc"
+                "source_message_id": "6b603403-a04d-4dc4-86df-616861ceef98"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -736,15 +736,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.35
+          "seconds": 0.3
         },
         {
           "position": 12,
           "user": "Подведи итог перехода от ThreadPerTaskWebServer к Executor на основе книги.",
           "expected": "document",
           "turn": {
-            "id": "28713de7-d4e9-42f1-8e85-9dea856affbe",
-            "session_id": "fd5202e3-347a-4de5-827b-0ff498540ded",
+            "id": "e9afd02c-02b0-4692-bae1-3729d83a8b47",
+            "session_id": "505a59a7-6668-4e9d-be91-8eec9bbbb02e",
             "position": 12,
             "content": "Подведи итог перехода от ThreadPerTaskWebServer к Executor на основе книги.",
             "answer": "В найденном фрагменте сказано: «A more responsive approach is to create a new thread for ser vicing each request, as shown in ThreadPerTaskWebServer in Listing 6.2. class ThreadPerTaskWebServe». [DOC:structure-0007]",
@@ -771,8 +771,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:01.991770Z",
-            "updated_at": "2026-10-02T14:25:03.047506Z"
+            "created_at": "2026-10-02T14:56:40.189190Z",
+            "updated_at": "2026-10-02T14:56:41.031911Z"
           },
           "search_queries": [
             "ThreadPerTaskWebServer drawbacks Executor benefits task execution policy",
@@ -790,20 +790,20 @@
             "goal": {
               "key": "goal",
               "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-              "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+              "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
             },
             "constraints": [
               {
                 "key": "length",
                 "value": "подробно",
-                "source_message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc"
+                "source_message_id": "6b603403-a04d-4dc4-86df-616861ceef98"
               }
             ],
             "terms": [
               {
                 "key": "старый сервер",
                 "value": "ThreadPerTaskWebServer",
-                "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+                "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
               }
             ],
             "clarifications": [],
@@ -813,27 +813,27 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 1.06
+          "seconds": 0.84
         }
       ],
       "final_state": {
         "goal": {
           "key": "goal",
           "value": "Объяснить начинающим Java-разработчикам переход от ThreadPerTaskWebServer к Executor",
-          "source_message_id": "086407ad-9454-4c0b-9519-4d5ea5311025"
+          "source_message_id": "ff67f676-a369-426f-bc6e-aae0700cc841"
         },
         "constraints": [
           {
             "key": "length",
             "value": "подробно",
-            "source_message_id": "b230bc59-557b-44ac-b8cd-e21b8a463dbc"
+            "source_message_id": "6b603403-a04d-4dc4-86df-616861ceef98"
           }
         ],
         "terms": [
           {
             "key": "старый сервер",
             "value": "ThreadPerTaskWebServer",
-            "source_message_id": "6ce304d5-7688-406f-8599-bdde1d518ab1"
+            "source_message_id": "1555bdb7-ee37-4fc2-91a9-6588af5da076"
           }
         ],
         "clarifications": [],
@@ -845,15 +845,15 @@
     {
       "id": "renderer",
       "title": "От FutureRenderer к CompletionService",
-      "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+      "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
       "turns": [
         {
           "position": 1,
           "user": "Моя цель — разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы.",
           "expected": "statement",
           "turn": {
-            "id": "bfc50653-da90-4304-b790-a53f867d6707",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 1,
             "content": "Моя цель — разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы.",
             "answer": "Уточнение сохранено.",
@@ -864,15 +864,15 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "bfc50653-da90-4304-b790-a53f867d6707",
+                "message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b",
                 "title": "Сообщение пользователя · уточнение"
               }
             ],
             "citations": [],
             "grounding_status": "statement",
             "error": null,
-            "created_at": "2026-10-02T14:25:03.050135Z",
-            "updated_at": "2026-10-02T14:25:03.051161Z"
+            "created_at": "2026-10-02T14:56:41.034906Z",
+            "updated_at": "2026-10-02T14:56:41.035936Z"
           },
           "search_queries": [],
           "selected_chunk_ids": [],
@@ -880,7 +880,7 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [],
             "terms": [],
@@ -898,8 +898,8 @@
           "user": "Аудитория моего объяснения — начинающие студенты.",
           "expected": "statement",
           "turn": {
-            "id": "c2046c65-f1b8-495e-8f4c-a2f73f3869d9",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "3beb5847-cd4e-4522-8163-b39ec831d13f",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 2,
             "content": "Аудитория моего объяснения — начинающие студенты.",
             "answer": "Уточнение сохранено.",
@@ -910,15 +910,15 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "c2046c65-f1b8-495e-8f4c-a2f73f3869d9",
+                "message_id": "3beb5847-cd4e-4522-8163-b39ec831d13f",
                 "title": "Сообщение пользователя · уточнение"
               }
             ],
             "citations": [],
             "grounding_status": "statement",
             "error": null,
-            "created_at": "2026-10-02T14:25:03.052444Z",
-            "updated_at": "2026-10-02T14:25:03.053475Z"
+            "created_at": "2026-10-02T14:56:41.036812Z",
+            "updated_at": "2026-10-02T14:56:41.038001Z"
           },
           "search_queries": [],
           "selected_chunk_ids": [],
@@ -926,13 +926,13 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "начинающие студенты",
-                "source_message_id": "c2046c65-f1b8-495e-8f4c-a2f73f3869d9"
+                "source_message_id": "3beb5847-cd4e-4522-8163-b39ec831d13f"
               }
             ],
             "terms": [],
@@ -950,8 +950,8 @@
           "user": "Под «изображениями» в этом разговоре я понимаю картинки, которые загрузчик скачивает для страницы.",
           "expected": "statement",
           "turn": {
-            "id": "32e618db-94aa-462a-9dc1-76487035d770",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "101246a7-dcd0-4761-9eeb-d157a13a25da",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 3,
             "content": "Под «изображениями» в этом разговоре я понимаю картинки, которые загрузчик скачивает для страницы.",
             "answer": "Уточнение сохранено.",
@@ -962,15 +962,15 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "32e618db-94aa-462a-9dc1-76487035d770",
+                "message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da",
                 "title": "Сообщение пользователя · уточнение"
               }
             ],
             "citations": [],
             "grounding_status": "statement",
             "error": null,
-            "created_at": "2026-10-02T14:25:03.054460Z",
-            "updated_at": "2026-10-02T14:25:03.055537Z"
+            "created_at": "2026-10-02T14:56:41.039029Z",
+            "updated_at": "2026-10-02T14:56:41.039961Z"
           },
           "search_queries": [],
           "selected_chunk_ids": [],
@@ -978,20 +978,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "начинающие студенты",
-                "source_message_id": "c2046c65-f1b8-495e-8f4c-a2f73f3869d9"
+                "source_message_id": "3beb5847-cd4e-4522-8163-b39ec831d13f"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1008,8 +1008,8 @@
           "user": "Что FutureRenderer делает одновременно с загрузкой изображений?",
           "expected": "document",
           "turn": {
-            "id": "82943a2e-aba7-4fd6-aa65-c8f233922cc7",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "dea1a914-0ed4-4ed7-9c3e-148bf290968f",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 4,
             "content": "Что FutureRenderer делает одновременно с загрузкой изображений?",
             "answer": "В найденном фрагменте сказано: «ections 5.5.2 and 5.4.) FutureRenderer allows the text to be rendered concurrently with download- ing the image data. When all the images are downloaded, they a». [DOC:structure-0045]",
@@ -1036,8 +1036,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:03.056586Z",
-            "updated_at": "2026-10-02T14:25:03.409630Z"
+            "created_at": "2026-10-02T14:56:41.040915Z",
+            "updated_at": "2026-10-02T14:56:41.346958Z"
           },
           "search_queries": [
             "FutureRenderer render text while downloading images"
@@ -1051,20 +1051,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "начинающие студенты",
-                "source_message_id": "c2046c65-f1b8-495e-8f4c-a2f73f3869d9"
+                "source_message_id": "3beb5847-cd4e-4522-8163-b39ec831d13f"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1074,15 +1074,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.35
+          "seconds": 0.31
         },
         {
           "position": 5,
           "user": "Что происходит, когда FutureRenderer вызывает Future.get?",
           "expected": "document",
           "turn": {
-            "id": "c5ea15e4-7363-4ddb-b1b6-a6a149ced58e",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "2e8380f7-c641-4741-8ea3-aada8f20580f",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 5,
             "content": "Что происходит, когда FutureRenderer вызывает Future.get?",
             "answer": "В найденном фрагменте сказано: «As a first step towards making the page renderer more concurrent, let’s divide it into two tasks, one that renders the text and one that downloads all the image». [DOC:structure-0044]",
@@ -1109,8 +1109,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:03.411929Z",
-            "updated_at": "2026-10-02T14:25:03.770413Z"
+            "created_at": "2026-10-02T14:56:41.348961Z",
+            "updated_at": "2026-10-02T14:56:41.658155Z"
           },
           "search_queries": [
             "FutureRenderer Future.get waits for downloaded images"
@@ -1124,20 +1124,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "начинающие студенты",
-                "source_message_id": "c2046c65-f1b8-495e-8f4c-a2f73f3869d9"
+                "source_message_id": "3beb5847-cd4e-4522-8163-b39ec831d13f"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1147,15 +1147,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.36
+          "seconds": 0.31
         },
         {
           "position": 6,
           "user": "Почему ожидание всех изображений может задержать отображение уже загруженных?",
           "expected": "document",
           "turn": {
-            "id": "672011a9-f31f-4f6d-a13f-d792179c724d",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "817c8c89-26e8-4643-b91f-973bf34b9880",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 6,
             "content": "Почему ожидание всех изображений может задержать отображение уже загруженных?",
             "answer": "В найденном фрагменте сказано: «ections 5.5.2 and 5.4.) FutureRenderer allows the text to be rendered concurrently with download- ing the image data. When all the images are downloaded, they a». [DOC:structure-0045]",
@@ -1182,8 +1182,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:03.772282Z",
-            "updated_at": "2026-10-02T14:25:04.105091Z"
+            "created_at": "2026-10-02T14:56:41.660129Z",
+            "updated_at": "2026-10-02T14:56:41.947454Z"
           },
           "search_queries": [
             "FutureRenderer waits for all images before rendering"
@@ -1197,20 +1197,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "начинающие студенты",
-                "source_message_id": "c2046c65-f1b8-495e-8f4c-a2f73f3869d9"
+                "source_message_id": "3beb5847-cd4e-4522-8163-b39ec831d13f"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1220,15 +1220,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.33
+          "seconds": 0.29
         },
         {
           "position": 7,
           "user": "Исправление: аудитория теперь опытные Java-разработчики, не студенты.",
           "expected": "statement",
           "turn": {
-            "id": "48e627ac-df84-494f-9be4-4a2bd0bda38b",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "01de58cc-fd90-4121-a7e0-50e33d1056f6",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 7,
             "content": "Исправление: аудитория теперь опытные Java-разработчики, не студенты.",
             "answer": "Уточнение сохранено.",
@@ -1239,15 +1239,15 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b",
+                "message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6",
                 "title": "Сообщение пользователя · уточнение"
               }
             ],
             "citations": [],
             "grounding_status": "statement",
             "error": null,
-            "created_at": "2026-10-02T14:25:04.107653Z",
-            "updated_at": "2026-10-02T14:25:04.109292Z"
+            "created_at": "2026-10-02T14:56:41.949442Z",
+            "updated_at": "2026-10-02T14:56:41.950623Z"
           },
           "search_queries": [],
           "selected_chunk_ids": [],
@@ -1255,20 +1255,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "опытные Java-разработчики",
-                "source_message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b"
+                "source_message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1285,8 +1285,8 @@
           "user": "Как CompletionService возвращает результаты отдельных задач?",
           "expected": "document",
           "turn": {
-            "id": "a09367e2-d030-4cbb-b531-b94aa9f6cb87",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "5116f76c-8bca-4513-95c8-7784e94a172c",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 8,
             "content": "Как CompletionService возвращает результаты отдельных задач?",
             "answer": "В найденном фрагменте сказано: «If you have a batch of computations to submit to an Executor and you want to retrieve their results as they become available, you could retain the Future associ». [DOC:structure-0050]",
@@ -1313,8 +1313,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:04.111362Z",
-            "updated_at": "2026-10-02T14:25:04.451901Z"
+            "created_at": "2026-10-02T14:56:41.951925Z",
+            "updated_at": "2026-10-02T14:56:42.249129Z"
           },
           "search_queries": [
             "CompletionService take completed task results completion queue"
@@ -1328,20 +1328,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "опытные Java-разработчики",
-                "source_message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b"
+                "source_message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1351,15 +1351,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.34
+          "seconds": 0.3
         },
         {
           "position": 9,
           "user": "Как Renderer с CompletionService отображает готовые изображения?",
           "expected": "document",
           "turn": {
-            "id": "cf13f248-72aa-415e-ba37-622acd53f890",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "c63ffed1-cab3-4237-a9bd-bba56f7a6b24",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 9,
             "content": "Как Renderer с CompletionService отображает готовые изображения?",
             "answer": "В найденном фрагменте сказано: «We c a n u s e a CompletionService to improve the perfor mance of the page ren- derer in two ways: shorter total runtime and improved responsiveness. We can cre». [DOC:structure-0053]",
@@ -1386,8 +1386,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:04.453769Z",
-            "updated_at": "2026-10-02T14:25:04.799231Z"
+            "created_at": "2026-10-02T14:56:42.251042Z",
+            "updated_at": "2026-10-02T14:56:42.567403Z"
           },
           "search_queries": [
             "Renderer CompletionService displays each image as it becomes available"
@@ -1401,20 +1401,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "опытные Java-разработчики",
-                "source_message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b"
+                "source_message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1424,15 +1424,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.35
+          "seconds": 0.32
         },
         {
           "position": 10,
           "user": "Что книга говорит о cooperative scheduling в Rust Tokio?",
           "expected": "unsupported",
           "turn": {
-            "id": "28068000-498b-45f7-a932-87897f1112b8",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "060a1ba0-9c33-4581-abcb-919d06d3587a",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 10,
             "content": "Что книга говорит о cooperative scheduling в Rust Tokio?",
             "answer": "Не знаю по найденным фрагментам; уточните раздел или термин.",
@@ -1444,8 +1444,8 @@
             "citations": [],
             "grounding_status": "insufficient_context",
             "error": null,
-            "created_at": "2026-10-02T14:25:04.801284Z",
-            "updated_at": "2026-10-02T14:25:05.586904Z"
+            "created_at": "2026-10-02T14:56:42.569493Z",
+            "updated_at": "2026-10-02T14:56:43.237374Z"
           },
           "search_queries": [
             "Rust Tokio cooperative scheduling",
@@ -1457,20 +1457,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "опытные Java-разработчики",
-                "source_message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b"
+                "source_message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1480,15 +1480,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.79
+          "seconds": 0.67
         },
         {
           "position": 11,
           "user": "Напомни мою цель и аудиторию объяснения.",
           "expected": "state",
           "turn": {
-            "id": "09a1d60e-3f73-42c1-92f7-25ba084aab49",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "d0aca656-0c50-4daa-bb99-bcc50d9f786e",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 11,
             "content": "Напомни мою цель и аудиторию объяснения.",
             "answer": "goal: Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы\naudience: опытные Java-разработчики\nизображения: картинки, которые загрузчик скачивает для страницы",
@@ -1499,25 +1499,25 @@
             "sources": [
               {
                 "kind": "message",
-                "message_id": "bfc50653-da90-4304-b790-a53f867d6707",
+                "message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b",
                 "title": "Сообщение пользователя · goal"
               },
               {
                 "kind": "message",
-                "message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b",
+                "message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6",
                 "title": "Сообщение пользователя · audience"
               },
               {
                 "kind": "message",
-                "message_id": "32e618db-94aa-462a-9dc1-76487035d770",
+                "message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da",
                 "title": "Сообщение пользователя · изображения"
               }
             ],
             "citations": [],
             "grounding_status": "state",
             "error": null,
-            "created_at": "2026-10-02T14:25:05.589295Z",
-            "updated_at": "2026-10-02T14:25:05.944023Z"
+            "created_at": "2026-10-02T14:56:43.239494Z",
+            "updated_at": "2026-10-02T14:56:43.534374Z"
           },
           "search_queries": [
             "FutureRenderer CompletionService task goal audience"
@@ -1527,20 +1527,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "опытные Java-разработчики",
-                "source_message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b"
+                "source_message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1550,15 +1550,15 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 0.36
+          "seconds": 0.3
         },
         {
           "position": 12,
           "user": "Сравни FutureRenderer и Renderer с CompletionService по времени отображения изображений.",
           "expected": "document",
           "turn": {
-            "id": "2c323275-adc2-4f3e-ac28-f4935d874e62",
-            "session_id": "0c60300b-c554-42c8-843e-1e9f41416bc9",
+            "id": "df8359ba-4d4a-4a82-8ace-0bb2f9f95320",
+            "session_id": "ee4e99a9-d1e2-44e0-a83b-0069774333f1",
             "position": 12,
             "content": "Сравни FutureRenderer и Renderer с CompletionService по времени отображения изображений.",
             "answer": "В найденном фрагменте сказано: «ections 5.5.2 and 5.4.) FutureRenderer allows the text to be rendered concurrently with download- ing the image data. When all the images are downloaded, they a». [DOC:structure-0045]",
@@ -1585,8 +1585,8 @@
             ],
             "grounding_status": "answered",
             "error": null,
-            "created_at": "2026-10-02T14:25:05.946641Z",
-            "updated_at": "2026-10-02T14:25:07.466922Z"
+            "created_at": "2026-10-02T14:56:43.536722Z",
+            "updated_at": "2026-10-02T14:56:44.705381Z"
           },
           "search_queries": [
             "FutureRenderer waits images Renderer CompletionService displays images as available",
@@ -1606,20 +1606,20 @@
             "goal": {
               "key": "goal",
               "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-              "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+              "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
             },
             "constraints": [
               {
                 "key": "audience",
                 "value": "опытные Java-разработчики",
-                "source_message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b"
+                "source_message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6"
               }
             ],
             "terms": [
               {
                 "key": "изображения",
                 "value": "картинки, которые загрузчик скачивает для страницы",
-                "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+                "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
               }
             ],
             "clarifications": [],
@@ -1629,27 +1629,27 @@
             "searched_as_expected": true,
             "answer_as_expected": true
           },
-          "seconds": 1.52
+          "seconds": 1.17
         }
       ],
       "final_state": {
         "goal": {
           "key": "goal",
           "value": "Разобраться, как FutureRenderer и CompletionService влияют на отзывчивость отображения веб-страницы",
-          "source_message_id": "bfc50653-da90-4304-b790-a53f867d6707"
+          "source_message_id": "0dd284e7-f759-4c36-80d6-b8ec8ab7d98b"
         },
         "constraints": [
           {
             "key": "audience",
             "value": "опытные Java-разработчики",
-            "source_message_id": "48e627ac-df84-494f-9be4-4a2bd0bda38b"
+            "source_message_id": "01de58cc-fd90-4121-a7e0-50e33d1056f6"
           }
         ],
         "terms": [
           {
             "key": "изображения",
             "value": "картинки, которые загрузчик скачивает для страницы",
-            "source_message_id": "32e618db-94aa-462a-9dc1-76487035d770"
+            "source_message_id": "101246a7-dcd0-4761-9eeb-d157a13a25da"
           }
         ],
         "clarifications": [],

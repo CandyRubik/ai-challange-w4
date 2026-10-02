@@ -11,6 +11,7 @@ from app.agents.agent import Agent
 from app.indexing.rag import DocumentRag, RetrievalSettings
 from app.indexing.store import SearchHit
 from app.main import app, get_rag_chat_service
+from app.rag_chat.models import RagTaskState
 from app.rag_chat.service import RagChatService
 from app.rag_chat.state import TurnInterpreter
 from app.rag_chat.store import SQLiteRagChatRepository
@@ -389,3 +390,124 @@ def test_mixed_question_identifies_unsupported_topic(tmp_path: Path) -> None:
     assert turn.sources[0]["kind"] == "document"
     assert "Tokio" in turn.answer
     assert "нет подтверждения" in turn.answer
+
+
+def test_question_without_model_search_query_uses_user_question() -> None:
+    payload = decision(scope="state")
+    payload["search_question"] = ""
+    interpreter = TurnInterpreter(QueueInterpretationModel(payload))
+
+    result = interpreter.interpret("Какова моя цель?", RagTaskState(), [])
+
+    assert result.kind == "question"
+    assert result.question_scope == "state"
+    assert result.search_question == "Какова моя цель?"
+
+
+def test_cost_question_expands_search_after_unsupported_first_excerpts(tmp_path: Path) -> None:
+    class CostIndex(Index):
+        def search(self, query: str, strategy: str, k: int) -> list[SearchHit]:
+            self.searches.append(query)
+            if "resource management" in query:
+                result = hit("Creating threads has resource overhead.")
+                result.metadata["chunk_id"] = "structure-0002"
+                return [result]
+            return [hit("ThreadPerTaskWebServer creates a thread for each task.")]
+
+    class CostInterpreter(InterpretationModel):
+        def generate_json(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+            payload = decision()
+            payload["search_question"] = "What are costs in ThreadPerTaskWebServer?"
+            return json.dumps(payload)
+
+    class CostAnswerModel:
+        def generate_json(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+            if "structure-0002" not in messages[0]["content"]:
+                return json.dumps({"status": "unknown", "claims": []})
+            return json.dumps({"status": "answered", "claims": [{
+                "text": "Создание потоков расходует ресурсы.",
+                "evidence": [{"chunk_id": "structure-0002",
+                              "quote": "Creating threads has resource overhead."}],
+            }]})
+
+    index = CostIndex()
+    chat = RagChatService(
+        SQLiteRagChatRepository(tmp_path / "rag.sqlite3"),
+        TurnInterpreter(CostInterpreter()),
+        DocumentRag(index, InterpretationModel(), reranker=Reranker(),
+                    settings=RetrievalSettings(rewrite=False, candidate_k=1, final_k=1)),
+        Agent(CostAnswerModel()),
+    )
+
+    turn = chat.send(chat.create().id, "Каковы издержки ThreadPerTaskWebServer?")
+
+    assert turn.grounding_status == "answered"
+    assert turn.sources[0]["chunk_id"] == "structure-0002"
+    assert len(index.searches) == 2
+    assert "resource management" in index.searches[1]
+
+
+def test_document_answer_uses_standalone_question_without_prior_assistant_text(
+    tmp_path: Path,
+) -> None:
+    class RecordingAnswerModel(AnswerModel):
+        def __init__(self) -> None:
+            self.messages: list[dict] = []
+
+        def generate_json(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+            self.messages = messages
+            return super().generate_json(messages=messages, max_tokens=max_tokens)
+
+    model = RecordingAnswerModel()
+    chat = RagChatService(
+        SQLiteRagChatRepository(tmp_path / "rag.sqlite3"),
+        TurnInterpreter(QueueInterpretationModel(
+            decision(kind="statement", goal_action="set", goal="Изучить Executor"),
+            decision(),
+        )),
+        DocumentRag(Index(), InterpretationModel(), reranker=Reranker(),
+                    settings=RetrievalSettings(rewrite=False, candidate_k=1, final_k=1)),
+        Agent(model),
+    )
+    session = chat.create()
+    chat.send(session.id, "Хочу изучить Executor.")
+
+    answered = chat.send(session.id, "Как он работает?")
+
+    assert answered.grounding_status == "answered"
+    assert [message["role"] for message in model.messages] == ["system", "user"]
+    assert json.loads(model.messages[1]["content"]) == {
+        "user_question": "Как он работает?",
+        "standalone_search_question": "What does Executor do?",
+    }
+    assert "Изучить Executor" in model.messages[0]["content"]
+
+
+def test_invalid_quote_retry_receives_validation_feedback(tmp_path: Path) -> None:
+    class RepairingAnswerModel:
+        def __init__(self) -> None:
+            self.calls: list[str] = []
+
+        def generate_json(self, *, messages: list[dict], max_tokens: int = 2000) -> str:
+            self.calls.append(messages[0]["content"])
+            quote = ("Invented excerpt without source support."
+                     if len(self.calls) < 4 else "Executor manages submitted tasks.")
+            return json.dumps({"status": "answered", "claims": [{
+                "text": "Executor выполняет задачи.",
+                "evidence": [{"chunk_id": "structure-0001", "quote": quote}],
+            }]})
+
+    model = RepairingAnswerModel()
+    chat = RagChatService(
+        SQLiteRagChatRepository(tmp_path / "rag.sqlite3"),
+        TurnInterpreter(InterpretationModel()),
+        DocumentRag(Index(), InterpretationModel(), reranker=Reranker(),
+                    settings=RetrievalSettings(rewrite=False, candidate_k=1, final_k=1)),
+        Agent(model),
+    )
+
+    turn = chat.send(chat.create().id, "Что делает Executor?")
+
+    assert turn.grounding_status == "answered"
+    assert len(model.calls) == 4
+    assert "Цитата отсутствует" in model.calls[1]

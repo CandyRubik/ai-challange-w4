@@ -22,7 +22,7 @@ from app.indexing.rag import DocumentRag, RetrievalSettings, RetrievalTrace
 from app.indexing.rerank import LocalCrossEncoderReranker
 from app.indexing.store import DocumentIndex
 from app.providers.deepseek import DeepSeekProvider
-from app.rag_chat.service import RagChatService
+from app.rag_chat.service import GROUNDING_SYSTEM_PROMPT, RagChatService
 from app.rag_chat.state import StateChange, TurnDecision, TurnInterpreter
 from app.rag_chat.store import SQLiteRagChatRepository
 
@@ -149,9 +149,11 @@ def run(output: Path = DEFAULT_OUTPUT, *, offline: bool = False) -> dict:
     with TemporaryDirectory(prefix="day25-rag-") as temporary_directory:
         repository = SQLiteRagChatRepository(Path(temporary_directory) / "chat.sqlite3")
         interpreter = OfflineInterpreter(scenarios) if offline else TurnInterpreter(fast_model)
-        answer_model = OfflineExtractiveModel() if offline else DeepSeekProvider()
+        answer_model = (OfflineExtractiveModel() if offline
+                        else DeepSeekProvider(thinking_enabled=False))
         chat = RagChatService(repository, interpreter, rag,
-                              Agent(answer_model), history_turns=4)
+                              Agent(answer_model, system_prompt=GROUNDING_SYSTEM_PROMPT,
+                                    max_tokens=3_000), history_turns=4)
         for scenario in scenarios:
             session = chat.create()
             rows = []

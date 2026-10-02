@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
+import json
 import logging
+import re
 from threading import Lock
 
-from ..agents.agent import Agent, AgentMessage, AgentOutputError
+from ..agents.agent import Agent, AgentOutputError
 from ..indexing.grounding import GroundedAnswer, GroundingError, validate_grounded_answer
 from ..indexing.rag import DocumentRag
 from ..indexing.store import SearchHit
@@ -16,6 +18,13 @@ from .store import RagTurnConflict, SQLiteRagChatRepository
 
 
 logger = logging.getLogger(__name__)
+
+GROUNDING_SYSTEM_PROMPT = (
+    "You format answers to questions about retrieved document excerpts. "
+    "Return only one valid JSON object matching the requested schema. "
+    "Never emit prose outside the JSON object."
+)
+MAX_GROUNDING_ATTEMPTS = 4
 
 
 class RagChatService:
@@ -106,13 +115,6 @@ class RagChatService:
             for turn in session.turns if turn.status == "done"
         ][-self._history_turns:]
 
-    def _context(self, session: RagSession) -> list[AgentMessage]:
-        context: list[AgentMessage] = []
-        for turn in [item for item in session.turns if item.status == "done"][-self._history_turns:]:
-            context.append({"role": "user", "content": turn.content})
-            context.append({"role": "assistant", "content": turn.answer})
-        return context
-
     @staticmethod
     def _memory(state: RagTaskState) -> MemoryContext:
         entries = []
@@ -155,21 +157,29 @@ class RagChatService:
         return "\n".join(lines), sources
 
     def _document_answer(
-        self, session: RagSession, turn: RagTurn, state: RagTaskState,
+        self, turn: RagTurn, decision: TurnDecision, state: RagTaskState,
         hits: list[SearchHit],
     ) -> GroundedAnswer:
         if not hits:
             return GroundedAnswer.unknown()
-        for retry in (False, True):
+        question = json.dumps({
+            "user_question": turn.content,
+            "standalone_search_question": decision.search_question,
+        }, ensure_ascii=False)
+        feedback = ""
+        for attempt in range(MAX_GROUNDING_ATTEMPTS):
             try:
                 raw = self._agent.respond_json(
-                    self._context(session), turn.content,
+                    [], question,
                     memory=self._memory(state),
-                    document_context=self._rag.grounded_prompt(hits, retry=retry),
+                    document_context=self._rag.grounded_prompt(
+                        hits, retry=attempt > 0, retry_feedback=feedback,
+                    ),
                 )
                 return validate_grounded_answer(raw, hits)
-            except (AgentOutputError, GroundingError):
-                if retry:
+            except (AgentOutputError, GroundingError) as error:
+                feedback = str(error)
+                if attempt == MAX_GROUNDING_ATTEMPTS - 1:
                     return GroundedAnswer.failed()
         return GroundedAnswer.failed()
 
@@ -199,6 +209,27 @@ class RagChatService:
                 collected.setdefault(hit.metadata["chunk_id"], hit)
         return list(collected.values())[:self._rag.settings.final_k * 2]
 
+    def _expand_cost_hits(
+        self, decision: TurnDecision, hits: list[SearchHit],
+    ) -> list[SearchHit]:
+        if not hits or not re.search(
+            r"\b(costs?|drawbacks?|overhead|limitations?)\b",
+            decision.search_question, flags=re.I,
+        ):
+            return hits
+        broad_query = decision.search_question
+        for term in self._named_terms(broad_query):
+            broad_query = re.sub(rf"\b{re.escape(term)}\b", "", broad_query, flags=re.I)
+        broad_query = broad_query.strip(" ?.!")
+        if len(broad_query) < 12:
+            return hits
+        related = self._rag.retrieve(
+            broad_query + " drawbacks overhead resource management",
+            [], "structure", force=True,
+        )
+        unique = {hit.metadata["chunk_id"]: hit for hit in [*hits, *related]}
+        return list(unique.values())[:self._rag.settings.final_k * 2]
+
     def _answer(
         self, session: RagSession, turn: RagTurn, decision: TurnDecision,
         state: RagTaskState,
@@ -222,7 +253,14 @@ class RagChatService:
         if decision.question_scope in {"goal", "state"}:
             content, sources = self._state_answer(decision, state)
             return content, sources, [], "state"
-        grounded = self._document_answer(session, turn, state, hits)
+        grounded = self._document_answer(turn, decision, state, hits)
+        if grounded.status == "insufficient_context":
+            expanded = self._expand_cost_hits(decision, hits)
+            if len(expanded) > len(hits):
+                retry_answer = self._document_answer(turn, decision, state, expanded)
+                if retry_answer.status == "answered":
+                    grounded = retry_answer
+                    hits = expanded
         content = grounded.content
         if grounded.status == "answered":
             available = " ".join(
