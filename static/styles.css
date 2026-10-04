@@ -177,6 +177,7 @@ textarea { resize: none; border: 1px solid #353b5c; border-radius: 14px; padding
 dialog { width: min(620px, calc(100% - 32px)); border: 1px solid #41486d; border-radius: 18px; padding: 0; color: #eef1ff; background: #101422; box-shadow: 0 28px 90px #000c; }
 dialog::backdrop { background: #05070bbb; backdrop-filter: blur(4px); }
 .invariants-menu { display: flex; align-items: center; justify-content: space-between; }
+.rag-chat-entry { display: block; margin-top: 8px; text-align: center; text-decoration: none; }
 .invariants-menu span { border-radius: 6px; background: #353058; padding: 2px 7px; color: #c5baff; font-size: 11px; }
 .active-invariants { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
 .active-invariants:empty { display: none; }
